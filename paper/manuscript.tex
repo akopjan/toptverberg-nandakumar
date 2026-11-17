@@ -186,22 +186,28 @@ number of functionals in Theorem~\ref{thm:B} is claimed to be
 optimal.
 
 \subsection*{Formalization status}
-Both main results, Theorem~\ref{thm:A}
+\begin{sloppypar}
+Both declared main targets in \texttt{Challenge.lean}, Theorem~\ref{thm:A}
 (\texttt{AkopyanSixfold.\allowbreak tverberg\_\allowbreak counterexample}) and
-Theorem~\ref{thm:B}
+Theorem~\ref{thm:B} / Theorem~\ref{thm:concentrated}
 (\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}),
-are formalized in Lean~4 (\texttt{v4.35.0}) with Mathlib~(\texttt{v4.35.0}) in
-\texttt{Challenge.lean} and proved completely without \texttt{sorry} in
-\texttt{Solution.lean}, using only the standard foundational axioms
-\texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
-Theorem~\ref{thm:A} is verified through the explicit scalar height-table
-reduction and piecewise-linear surgery in \texttt{RequestProject/};
-Theorem~\ref{thm:B} is verified unconditionally for convex bodies in
-$\R^d$ ($d\ge24$) under the Hausdorff metric and a Borel probability
-measure (without restricting to absolutely continuous measures; Section~\ref{sec:formal}). The stronger
-uniform absolutely continuous obstruction (Theorem~\ref{thm:concentrated})
-and Theorem~\ref{thm:C} are not part of the checked \texttt{Challenge.lean}
-targets.
+are proved completely without \texttt{sorry} in \texttt{Solution.lean} on Lean~4
+(\texttt{v4.35.0}) and Mathlib~(\texttt{v4.35.0}), using only the standard
+axioms \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
+Theorem~\ref{thm:A} is verified unconditionally via the scalar height-table
+reduction and piecewise-linear surgery in \texttt{RequestProject/}.
+\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}
+verifies in every dimension $d\ge24$ the join-padding reduction
+(Lemma~\ref{lem:padding}), the $1$-Lipschitz Hausdorff-continuity and transfer
+of the inward-distance body functionals (Lemma~\ref{lem:transfer}), the
+concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), the uniform
+obstruction for all $\eta$-concentrated absolutely continuous measures, and a
+normalized Lebesgue ball probability measure, conditionally on an
+$\eta$-central blocking configuration of $5d-4$ markers
+(\texttt{IsCentralBlocking}; Section~\ref{sec:formal}). Neither
+Theorem~\ref{thm:C} nor the semialgebraic blocking construction of
+Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral} is formalized in Lean.
+\end{sloppypar}
 
 \section{Height tables and their forbidden subspaces}\label{sec:tables}
 
@@ -1196,16 +1202,21 @@ and Mathlib~\texttt{v4.35.0}, configured for Palomar via
 and \texttt{formalization.yaml}) builds cleanly with zero \texttt{sorry}
 in \texttt{Solution.lean} and all its dependencies.
 Theorem~\ref{thm:A} (\texttt{AkopyanSixfold.\allowbreak tverberg\_\allowbreak counterexample})
-is proved by executing the scalar height-table reduction, rational shell
+is proved unconditionally via the scalar height-table reduction, rational shell
 degree balance, and piecewise-linear zero-cancellation surgery in
-\texttt{RequestProject/}. Theorem~\ref{thm:B}
+\texttt{RequestProject/}. Theorem~\ref{thm:B} and Theorem~\ref{thm:concentrated}
 (\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample})
-is proved in every dimension $d\ge24$ using standard Euclidean topologies, Mathlib's
-Hausdorff metric on \texttt{ConvexBody}, and a Borel probability measure
-(\texttt{IsProbabilityMeasure}), without restricting to absolutely
-continuous measures. Kernel axiom inspection confirms that
-both main theorems depend exclusively on \texttt{propext},
-\texttt{Quot.sound}, and \texttt{Classical.choice}.
+are formalized in every dimension $d\ge24$ conditionally on an $\eta$-central
+blocking configuration of $5d-4$ markers (\texttt{IsCentralBlocking}):
+\texttt{Solution.lean} proves the join-padding reduction
+(Lemma~\ref{lem:padding}), the $1$-Lipschitz Hausdorff-continuity and transfer
+of the inward-distance body functionals (Lemma~\ref{lem:transfer}), the
+concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), the uniform
+obstruction across all $\eta$-concentrated absolutely continuous measures, and
+a normalized Lebesgue ball witness, without formalizing Theorem~\ref{thm:C} or
+the semialgebraic blocking construction of Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral}.
+Kernel axiom inspection confirms that both declared theorems depend exclusively
+on \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
 \end{sloppypar}
 
 \subsection*{Questions left open by these proofs}

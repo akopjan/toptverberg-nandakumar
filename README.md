@@ -12,7 +12,7 @@ This repository formalizes Theorems A and B from [*Sixfold Tverberg counterexamp
 
 The challenge is specified in `Challenge.lean` and checked by the Palomar Comparator against `Solution.lean`:
 
-1. **Theorem A (`AkopyanSixfold.tverberg_counterexample`)**:
+1. **Theorem A (`AkopyanSixfold.tverberg_counterexample`, unconditional)**:
    There exists a continuous map $\Delta^{35} \to \mathbb{R}^6$ whose images of six pairwise disjoint faces never meet:
    ```lean
    theorem tverberg_counterexample :
@@ -20,19 +20,40 @@ The challenge is specified in `Challenge.lean` and checked by the Palomar Compar
          IsAlmostSixEmbedding f
    ```
 
-2. **Theorem B (`AkopyanSixfold.convex_partition_counterexample`)**:
-   In every dimension $d \ge 24$, there exist $d - 1$ continuous functionals on convex bodies and a probability measure such that no convex partition of the unit ball into six equal-measure parts equalizes all these functionals:
+2. **Theorem B (`AkopyanSixfold.convex_partition_counterexample`, conditional on central blocking markers)**:
+   In every dimension $d \ge 24$, given an $\eta$-central blocking configuration `p` of $5d - 4$ markers (`IsCentralBlocking p eta`), there exist $d - 1$ continuous functionals `Phi` on convex bodies (chosen before any measure) that cannot be equalized on any fair convex six-partition of the unit ball for any $\eta$-concentrated absolutely continuous measure `mu`, and in particular for an explicit absolutely continuous probability measure:
    ```lean
    theorem convex_partition_counterexample :
        ∀ d : ℕ, 24 ≤ d →
-       ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
-         Continuous Phi ∧
-         IsProbabilityMeasure mu ∧
-         ∀ C : Fin 6 → Body d,
-           IsSixPartition C →
-           (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
-           ∃ i, Phi (C i) ≠ Phi (C 0)
+       ∀ (p : Fin (5 * d - 4) → Ambient d) (eta : ℝ),
+         IsCentralBlocking p eta →
+         ∃ Phi : Body d → (Fin (d - 1) → ℝ),
+           Continuous Phi ∧
+           (∀ mu : Measure (Ambient d),
+             mu.AbsolutelyContinuous (volume : Measure (Ambient d)) →
+             0 < mu (unitBall d) →
+             mu (unitBall d) < ⊤ →
+             5 * mu (unitBall d) <
+               6 * mu (Metric.closedBall (0 : Ambient d) eta) →
+             ∀ C : Fin 6 → Body d,
+               IsSixPartition C →
+               (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+               ∃ i, Phi (C i) ≠ Phi (C 0)) ∧
+           (∃ mu : Measure (Ambient d),
+             IsProbabilityMeasure mu ∧
+             mu.AbsolutelyContinuous (volume : Measure (Ambient d)) ∧
+             ∀ C : Fin 6 → Body d,
+               IsSixPartition C →
+               (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+               ∃ i, Phi (C i) ≠ Phi (C 0))
    ```
+
+---
+
+## Scope and Alignment with the Manuscript
+
+- **Theorem A (`RequestProject/` and `Solution.lean`)**: Proved unconditionally and without `sorry` via the scalar height-table reduction, rational boundary degree cancellation, and PL zero-cancellation surgery.
+- **Theorem B (`Solution.lean`)**: Proved without `sorry` by iterating join-padding $d - 8$ times from Theorem A ($\Delta^{35} \to \mathbb{R}^6$) to obtain an almost six-embedding $\Delta^{5d-5} \to \mathbb{R}^{d-2}$ (Lemma 3.3), proving Hausdorff continuity of inward distances `inwardDist` via Hahn–Banach separation, transferring the almost six-embedding to $d - 1$ body functionals $\Phi$ fixed before the measure (Lemma 5.3), proving that any fair partition for a concentrated measure meets the $\eta$-ball (Lemma 5.4), and instantiating an absolutely continuous normalized Lebesgue ball measure. The existence of $\eta$-central blocking markers (Theorem C $\Delta^{119} \to \mathbb{R}^{22}$ and the semialgebraic cone-skeleton dimension bound in Sections 3–5 of [`paper/manuscript.tex`](paper/manuscript.tex), which uses $5d$ markers) is supplied via the explicit hypothesis `IsCentralBlocking p eta` rather than formalized unconditionally.
 
 ---
 

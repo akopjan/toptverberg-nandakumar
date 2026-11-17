@@ -27,18 +27,28 @@ sources:
     authors:
       - "Arseniy Akopyan"
     type: "paper"
-    location: "paper/manuscript.tex, Theorems A and B"
+    location: "paper/manuscript.tex, Theorems A, B, and 1.1"
     relationship: "formalizes"
     author_endorsement: "participated"
     year: 2026
+    note: >-
+      Theorem A (AkopyanSixfold.tverberg_counterexample) is formalized
+      unconditionally. Theorem B (AkopyanSixfold.convex_partition_counterexample)
+      formalizes the join-padding reduction (Lemma 3.3), the Hausdorff-continuous
+      inward-distance functional transfer (Lemma 5.3), the concentrated-measure
+      fairness lemma (Lemma 5.4), and both the uniform concentrated-measure
+      obstruction (Theorem 1.1) and a concrete absolutely continuous probability
+      measure obstruction (Theorem B), conditional on a blocking marker
+      hypothesis IsCentralBlocking p eta (Lemmas 5.1--5.2).
 
 status:
   scope: >-
-    Complete, sorry-free Lean 4 formalization of the two main theorems of the
-    paper: the sixfold topological Tverberg counterexample Δ³⁵ → ℝ⁶ (Theorem A)
-    and the counterexample to the generalized Nandakumar--Ramana Rao convex
-    six-partition problem in dimensions d ≥ 24 (Theorem B). Verified with
-    comparator under standard Lean 4 axioms without custom axioms or sorry.
+    Sorry-free Lean 4 formalization of AkopyanSixfold.tverberg_counterexample
+    (unconditional proof of Theorem A: an almost six-embedding Δ³⁵ → ℝ⁶) and
+    AkopyanSixfold.convex_partition_counterexample (conditional proof of the
+    inward-distance transfer and concentrated absolutely continuous measure
+    obstruction for d ≥ 24). Verified with comparator under the standard Lean 4
+    axioms [propext, Quot.sound, Classical.choice] without custom axioms or sorry.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -63,13 +73,62 @@ status:
         - "Classical.choice"
       comparator_config: "comparator.json"
 
+fidelity:
+  divergences: >-
+    AkopyanSixfold.tverberg_counterexample formalizes Theorem A unconditionally.
+    In paper/manuscript.tex, Theorems 1.1 and B are unconditional: Section 3
+    produces an almost six-embedding Δ¹¹⁹ → ℝ²² (Theorem C) and pads it
+    d − 24 times to Δ^(5d−1) → ℝ^(d−2) (Corollary 3.4), Section 4 bounds the
+    semialgebraic parameter dimension of central six-cone skeleta, and
+    Lemmas 5.1--5.2 construct 5d rational blocking markers and a central-avoidance
+    radius eta ∈ (0, 1). In Challenge.lean, neither Theorem C nor the
+    semialgebraic blocking construction (Lemmas 5.1--5.2) is formalized; instead,
+    AkopyanSixfold.convex_partition_counterexample takes a tuple p of 5d − 4
+    markers and radius eta satisfying IsCentralBlocking p eta as an explicit
+    hypothesis. Starting from Theorem A (36 vertices in ℝ⁶), Solution.lean
+    unconditionally formalizes join-padding d − 8 times to obtain an almost
+    six-embedding on 5d − 4 vertices into ℝ^(d−2) (Lemma 3.3), proves
+    Hausdorff continuity via Hahn--Banach separation and transfers it to d − 1
+    body functionals Φ chosen before any measure (Lemma 5.3), proves that any
+    fair partition under a concentrated absolutely continuous measure meets the
+    eta-ball (Lemma 5.4), and derives both the uniform obstruction for all
+    eta-concentrated measures mu ≪ volume and an explicit normalized Lebesgue
+    ball probability measure. Note that the semialgebraic dimension count of
+    Lemma 5.1 requires 5d markers rather than 5d − 4.
+
 automation:
   methods:
     - method: "agent"
       models: ["Aristotle", "Gemini"]
       framework: "AI-assisted Lean 4 formalization"
       tool_setup: >-
-        Formalization and challenge development assisted by Aristotle and Gemini.
+        Theorem A proof closure in RequestProject/ assisted by Aristotle;
+        join-padding, inward-distance transfer, concentrated-measure proofs, and
+        integration assisted by Gemini.
 
 review:
   status: "self-assessed"
+
+alignment:
+  namespace: "AkopyanSixfold"
+  statements:
+    - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorem A"
+      lean: "AkopyanSixfold.tverberg_counterexample"
+      module: "Challenge"
+      status: "proved (unconditional)"
+      note: >-
+        Unconditional proof of an almost six-embedding Δ³⁵ → ℝ⁶.
+    - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorems B and 1.1"
+      lean: "AkopyanSixfold.convex_partition_counterexample"
+      module: "Challenge"
+      status: "proved (conditional on IsCentralBlocking p eta)"
+      note: >-
+        Proves the join-padding reduction (Lemma 3.3), the 1-Lipschitz
+        Hausdorff-continuous inward-distance transfer (Lemma 5.3), the
+        concentrated-measure fairness lemma (Lemma 5.4), the uniform obstruction
+        for all eta-concentrated absolutely continuous measures (Theorem 1.1),
+        and existence of a concrete absolutely continuous probability measure
+        (Theorem B) in every dimension d ≥ 24, conditional on an explicit
+        eta-central blocking tuple of 5d − 4 markers. Does not formalize
+        Theorem C (Δ¹¹⁹ → ℝ²²) or the semialgebraic blocking construction
+        (Lemmas 5.1--5.2).
