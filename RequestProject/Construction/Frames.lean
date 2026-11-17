@@ -1,9 +1,13 @@
-import Mathlib
-import RequestProject.Construction.Map
-import RequestProject.Construction.Chart
-import RequestProject.Construction.Obstacles
-import RequestProject.Construction.DetLemmas
-import RequestProject.Surgery.Good
+module
+
+public import Mathlib
+public import RequestProject.Construction.Map
+public import RequestProject.Construction.Chart
+public import RequestProject.Construction.Obstacles
+public import RequestProject.Construction.DetLemmas
+public import RequestProject.Surgery.Good
+
+@[expose] public section
 
 /-!
 # The initial map in the chart, and its local frames

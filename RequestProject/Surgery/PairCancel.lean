@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Surgery.Frame
-import RequestProject.Surgery.Cutoff
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Frame
+public import RequestProject.Surgery.Cutoff
+
+@[expose] public section
 
 /-!
 # Zero-pair cancellation in standard position

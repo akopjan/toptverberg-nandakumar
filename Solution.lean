@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Solution
+module
+
+public import Mathlib
+public import RequestProject.Solution
+
+@[expose] public section
 
 /-!
 # Sixfold Tverberg Counterexample and Convex Equipartition Obstruction (`Solution.lean`)
@@ -70,16 +74,16 @@ def IsSixPartition {d : ℕ} (C : Fin 6 → Body d) : Prop :=
     Disjoint (interior (C i : Set (Ambient d)))
              (interior (C j : Set (Ambient d)))
 
-private def originDist (d : ℕ) (C : Body d) : ℝ :=
+def originDist (d : ℕ) (C : Body d) : ℝ :=
   Metric.infDist (0 : Ambient d) (C : Set (Ambient d))
 
-private lemma originDist_le (d : ℕ) (C D : Body d) :
+lemma originDist_le (d : ℕ) (C D : Body d) :
     originDist d C ≤ originDist d D + dist C D := by
   unfold originDist
   rw [dist_comm]
   exact Metric.infDist_le_infDist_add_hausdorffDist ConvexBody.hausdorffEDist_ne_top
 
-private lemma continuous_originDist (d : ℕ) : Continuous (originDist d) :=
+lemma continuous_originDist (d : ℕ) : Continuous (originDist d) :=
   (LipschitzWith.of_le_add (originDist_le d)).continuous
 
 /-- **Theorem B**: Counterexample to the generalized Nandakumar--Ramana Rao problem:

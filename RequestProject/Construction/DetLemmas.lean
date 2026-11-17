@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Cochain
+module
+
+public import Mathlib
+public import RequestProject.Cochain
+
+@[expose] public section
 
 /-!
 # Determinant identities for local signs

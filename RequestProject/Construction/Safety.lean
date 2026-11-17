@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Construction.PyrAlg
+module
+
+public import Mathlib
+public import RequestProject.Construction.PyrAlg
+
+@[expose] public section
 
 /-!
 # Where `F0` can fail to be safe; compatibility of `F0`

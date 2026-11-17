@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Shift
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Shift
+
+@[expose] public section
 
 /-!
 # Maps with finitely many transverse, balanced zeros

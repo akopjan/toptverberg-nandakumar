@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Good
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Good
+
+@[expose] public section
 
 /-!
 # Shifting a zero of a good map keeps it good

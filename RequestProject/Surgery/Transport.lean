@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.PairCancel
+module
+
+public import Mathlib
+public import RequestProject.Surgery.PairCancel
+
+@[expose] public section
 
 /-!
 # Zero-pair cancellation for two arbitrary zeros

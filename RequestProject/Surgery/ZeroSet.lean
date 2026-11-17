@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Transport
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Transport
+
+@[expose] public section
 
 /-!
 # Local frames and signs of zeros

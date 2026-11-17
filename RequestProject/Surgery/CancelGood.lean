@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Surgery.Clear
-import RequestProject.Surgery.Transport
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Clear
+public import RequestProject.Surgery.Transport
+
+@[expose] public section
 
 /-!
 # Cancelling a pair of zeros of a good map

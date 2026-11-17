@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Separate
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Separate
+
+@[expose] public section
 
 /-!
 # Clearing the segment between two zeros

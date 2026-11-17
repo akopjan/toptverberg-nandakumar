@@ -1,6 +1,10 @@
-import RequestProject.Reduction
-import RequestProject.Balance
-import RequestProject.Construction.Assembly
+module
+
+public import RequestProject.Reduction
+public import RequestProject.Balance
+public import RequestProject.Construction.Assembly
+
+@[expose] public section
 
 /-!
 # `tverberg_counterexample`, reduced to `Tverberg6R.heightExtension`

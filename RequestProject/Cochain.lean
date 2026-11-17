@@ -1,4 +1,8 @@
-import Mathlib
+module
+
+public import Mathlib
+
+@[expose] public section
 
 /-!
 # The alternating identity for oriented simplex indices (Lemma 5, algebraic form)

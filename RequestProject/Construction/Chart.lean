@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Reduction
+module
+
+public import Mathlib
+public import RequestProject.Reduction
+
+@[expose] public section
 
 /-!
 # A chart of the mass simplex

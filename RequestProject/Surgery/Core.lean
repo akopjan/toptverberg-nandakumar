@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.PathHomotopy
+module
+
+public import Mathlib
+public import RequestProject.Surgery.PathHomotopy
+
+@[expose] public section
 
 /-!
 # Auxiliary constructions for zero-pair cancellation

@@ -1,9 +1,13 @@
-import Mathlib
-import RequestProject.Construction.Safety
-import RequestProject.Construction.Chart
-import RequestProject.Construction.Obstacles
-import RequestProject.Surgery.Main
-import RequestProject.Construction.Good
+module
+
+public import Mathlib
+public import RequestProject.Construction.Safety
+public import RequestProject.Construction.Chart
+public import RequestProject.Construction.Obstacles
+public import RequestProject.Surgery.Main
+public import RequestProject.Construction.Good
+
+@[expose] public section
 
 /-!
 # Assembly: the height extension

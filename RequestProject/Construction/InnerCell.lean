@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Construction.CellCount
-import RequestProject.Construction.Safety
+module
+
+public import Mathlib
+public import RequestProject.Construction.CellCount
+public import RequestProject.Construction.Safety
+
+@[expose] public section
 
 /-!
 # The inner cell

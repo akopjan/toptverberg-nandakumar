@@ -1,7 +1,11 @@
-import Mathlib
-import RequestProject.Construction.Layout
-import RequestProject.Boundary
-import RequestProject.Surgery.Core
+module
+
+public import Mathlib
+public import RequestProject.Construction.Layout
+public import RequestProject.Boundary
+public import RequestProject.Surgery.Core
+
+@[expose] public section
 
 /-!
 # The initial height table `F0`

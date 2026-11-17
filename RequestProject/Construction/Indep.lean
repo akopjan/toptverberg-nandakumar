@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Balance
+module
+
+public import Mathlib
+public import RequestProject.Balance
+
+@[expose] public section
 
 /-!
 # Affine systems with points in general position

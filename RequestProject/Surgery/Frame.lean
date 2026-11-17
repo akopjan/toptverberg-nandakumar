@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.GLPath
+module
+
+public import Mathlib
+public import RequestProject.Surgery.GLPath
+
+@[expose] public section
 
 /-!
 # Frames

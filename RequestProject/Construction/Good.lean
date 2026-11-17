@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Construction.PyrCell
+module
+
+public import Mathlib
+public import RequestProject.Construction.PyrCell
+
+@[expose] public section
 
 /-!
 # `Fmap` is a good map

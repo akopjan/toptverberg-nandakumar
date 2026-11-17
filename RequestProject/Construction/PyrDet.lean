@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Construction.InnerCell
+module
+
+public import Mathlib
+public import RequestProject.Construction.InnerCell
+
+@[expose] public section
 
 /-!
 # The pyramid cells: affine coordinates and orientation determinant

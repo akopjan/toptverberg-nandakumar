@@ -1,4 +1,8 @@
-import RequestProject.Generic
+module
+
+public import RequestProject.Generic
+
+@[expose] public section
 
 /-!
 # The additive table `H⁰` and the anchors (Corollary 3 and Lemma 4)

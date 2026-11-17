@@ -1,4 +1,8 @@
-import RequestProject.Reduction
+module
+
+public import RequestProject.Reduction
+
+@[expose] public section
 
 /-!
 # Generic initial data (Step A)

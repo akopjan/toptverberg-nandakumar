@@ -1,5 +1,9 @@
-import RequestProject.Boundary
-import RequestProject.Cochain
+module
+
+public import RequestProject.Boundary
+public import RequestProject.Cochain
+
+@[expose] public section
 
 /-!
 # The binomial degree balance (Lemma 5 and identity (18), algebraic form)

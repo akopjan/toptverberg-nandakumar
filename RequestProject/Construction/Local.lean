@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Construction.Map
+module
+
+public import Mathlib
+public import RequestProject.Construction.Map
+
+@[expose] public section
 
 /-!
 # Local description of `F0`

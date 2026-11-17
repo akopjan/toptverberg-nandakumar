@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Boundary
+module
+
+public import Mathlib
+public import RequestProject.Boundary
+
+@[expose] public section
 
 /-!
 # The obstacles `ℓ_m` and their mutual position

@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Construction.Frames
-import RequestProject.Construction.Indep
+module
+
+public import Mathlib
+public import RequestProject.Construction.Frames
+public import RequestProject.Construction.Indep
+
+@[expose] public section
 
 /-!
 # Counting the zeros in one cell

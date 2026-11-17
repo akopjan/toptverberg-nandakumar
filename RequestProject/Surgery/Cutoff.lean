@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Core
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Core
+
+@[expose] public section
 
 /-!
 # Cut-off functions used in the zero-pair cancellation

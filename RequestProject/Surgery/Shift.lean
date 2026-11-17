@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Surgery.ZeroSet
-import RequestProject.Surgery.Cutoff
+module
+
+public import Mathlib
+public import RequestProject.Surgery.ZeroSet
+public import RequestProject.Surgery.Cutoff
+
+@[expose] public section
 
 /-!
 # Shifting zeros

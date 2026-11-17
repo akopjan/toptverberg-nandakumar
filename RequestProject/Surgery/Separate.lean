@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Surgery.ShiftGood
-import RequestProject.Surgery.Avoid
+module
+
+public import Mathlib
+public import RequestProject.Surgery.ShiftGood
+public import RequestProject.Surgery.Avoid
+
+@[expose] public section
 
 /-!
 # Separating zeros of different kernel classes, and clearing segments

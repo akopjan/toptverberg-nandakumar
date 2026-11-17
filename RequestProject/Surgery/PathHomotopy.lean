@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Surgery.Avoid
+module
+
+public import Mathlib
+public import RequestProject.Surgery.Avoid
+
+@[expose] public section
 
 /-!
 # Simple connectivity of complements of high-codimension subspaces

@@ -1,5 +1,9 @@
-import Mathlib
-import RequestProject.Construction.PyrDet
+module
+
+public import Mathlib
+public import RequestProject.Construction.PyrDet
+
+@[expose] public section
 
 /-!
 # The pyramid cells

@@ -1,6 +1,10 @@
-import Mathlib
-import RequestProject.Construction.Local
-import RequestProject.Construction.Indep
+module
+
+public import Mathlib
+public import RequestProject.Construction.Local
+public import RequestProject.Construction.Indep
+
+@[expose] public section
 
 /-!
 # `F0` on a pyramid
