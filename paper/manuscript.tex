@@ -1,0 +1,1276 @@
+\documentclass[a4paper,11pt,reqno]{amsart}
+\usepackage[T1]{fontenc}
+\IfFileExists{pplr8t.tfm}{\usepackage{mathpazo}}{\usepackage{lmodern}}
+\usepackage[margin=27mm]{geometry}
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\IfFileExists{mathtools.sty}{\usepackage{mathtools}}{\usepackage{amsmath}}
+\IfFileExists{booktabs.sty}{\usepackage{booktabs}}{}
+\usepackage{amssymb,array}
+\usepackage[hidelinks,pdfauthor={Arseniy Akopyan},pdftitle={Sixfold coincidences and obstructed convex equipartitions}]{hyperref}
+\IfFileExists{enumitem.sty}{\usepackage{enumitem}\setlist[enumerate]{label=\textup{(\roman*)},leftmargin=2.3em,itemsep=3pt}}{}
+\setlength{\emergencystretch}{2em}
+\setlength{\parindent}{1.2em}
+\allowdisplaybreaks[1]
+\raggedbottom
+\newcommand{\R}{\mathbb R}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\N}{\mathbb N}
+\newcommand{\Sym}{\mathfrak S}
+\newcommand{\dd}{\,d}
+\newcommand{\intt}{\operatorname{int}}
+\newcommand{\conv}{\operatorname{conv}}
+\newcommand{\spanlin}{\operatorname{span}}
+\newcommand{\codim}{\operatorname{codim}}
+\newcommand{\diag}{\operatorname{Diag}}
+\newcommand{\Gr}{\operatorname{Gr}}
+\newcommand{\dist}{\operatorname{dist}}
+\newcommand{\supp}{\operatorname{supp}}
+\newcommand{\id}{\operatorname{id}}
+\newcommand{\cl}{\operatorname{cl}}
+\newcommand{\one}{\mathbf 1}
+\newcommand{\sphere}{\mathbb S}
+\newtheorem{mainthm}{Theorem}
+\renewcommand{\themainthm}{\Alph{mainthm}}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+\title[Sixfold Tverberg and convex equipartitions]{Sixfold Tverberg counterexamples
+ and convex equipartition obstructions}
+\author{Arseniy Akopyan}
+\date{16 November 2026}
+\subjclass[2020]{Primary 52C35, 55M20; Secondary 52A20, 55S91}
+\keywords{Topological Tverberg theorem, convex partition, arrangement complement, equivariant map, Hausdorff-continuous functional}
+\begin{document}
+\begin{abstract}
+We construct a counterexample for the generalized Nandakumar--Ramana Rao
+problem: in every dimension $d\ge24$, there are $d-1$ continuous
+functionals on convex bodies and a probability measure such that there is
+no convex partition of the unit ball into six parts of equal measure on
+which all these functionals are equalized.
+
+We also show that the topological Tverberg conjecture fails for sixfold
+intersections already in $\R^6$: we construct a continuous map
+$\Delta^{35}\to\R^6$ whose images of six pairwise disjoint faces never
+meet.
+\end{abstract}
+\maketitle
+
+\section{Introduction and main results}
+
+Let $r\ge2$ and $d\ge1$ be integers, and put $N=(r-1)(d+1)$.
+Tverberg's theorem asserts that every affine map
+$f:\Delta^N\to\R^d$ sends $r$ pairwise vertex-disjoint faces to
+sets with a common point. The \emph{topological Tverberg conjecture}
+asked whether the same holds for every continuous map. It does when
+$r$ is a prime power. Frick showed that it fails for non-prime
+powers \cite{Frick}, combining the higher-multiplicity Whitney trick
+of Mabillard and Wagner \cite{MW} with a reduction originating in
+Gromov's work \cite{Gromov}, developed as the constraint method by
+Blagojevi\'c, Frick, and Ziegler \cite{BFZ}. Subsequent work gave
+stronger counterexamples \cite{AMS,AKS}.
+
+The smallest non-prime-power multiplicity is $r=6$. For a simplex
+$\Delta^N$, we call a continuous map $f:\Delta^N\to\R^d$ an
+\emph{almost six-embedding} if
+$f(\sigma_1)\cap\cdots\cap f(\sigma_6)=\varnothing$ for every six
+pairwise vertex-disjoint faces. Equivalently, no six points with
+pairwise disjoint barycentric supports have the same image. Our
+first result is a counterexample to the topological Tverberg
+assertion in dimension six.
+
+\begin{mainthm}\label{thm:A}
+The topological Tverberg conjecture fails for sixfold intersections in
+$\R^6$: there is a continuous map
+\[
+                         f:\Delta^{35}\longrightarrow\R^6
+\]
+whose images of six pairwise disjoint faces never meet.
+\end{mainthm}
+
+For $D\ge1$, let $B_D=\{x\in\R^D:\|x\|\le1\}$ be the unit ball,
+let $tB_D$ be the concentric ball of radius $t>0$, and let $\mathcal K_D$
+denote the Hausdorff space of nonempty compact convex subsets of $\R^D$.
+A \emph{convex six-partition} of $B_D$ consists of six full-dimensional
+compact convex sets covering $B_D$ with pairwise disjoint interiors.
+
+\begin{mainthm}\label{thm:B}
+In every dimension $d\ge24$, there are $d-1$ continuous functionals on
+convex bodies and a probability measure on the unit ball $B_d$ such that
+there is no convex partition of $B_d$ into six parts of equal measure on
+which all these functionals are equalized.
+\end{mainthm}
+
+In particular, in $\R^{24}$ we obtain \emph{23 functionals and one
+additional measure}. No centrality functional is concealed in this
+count. Theorem~\ref{thm:B} is a consequence of a uniform obstruction
+valid for every sufficiently concentrated absolutely continuous measure.
+
+\begin{theorem}[Uniform obstruction for concentrated measures]\label{thm:concentrated}
+For every integer $D\ge24$, there exist a continuous map
+$\Phi_D:\mathcal K_D\to\R^{D-1}$ and a number $\eta_D\in(0,1)$ with the
+following property. Let $\mu$ be any Borel measure on $\R^D$, absolutely
+continuous with respect to Lebesgue measure, such that
+\[
+ 0<\mu(B_D)<\infty,
+ \qquad
+ \mu(\eta_D B_D)>\frac56\mu(B_D).
+\]
+Then no convex six-partition $(C_1,\ldots,C_6)$ of $B_D$ satisfies both
+\[
+ \mu(C_i)=\frac{\mu(B_D)}6\quad(1\le i\le6),
+ \qquad
+ \Phi_D(C_1)=\cdots=\Phi_D(C_6).
+\]
+The map $\Phi_D$ and the radius $\eta_D$ are chosen before the measure
+$\mu$, and are independent of it.
+\end{theorem}
+
+Let $\gamma_{D,\sigma}$ be the centered Gaussian probability measure
+with covariance $\sigma^2I_D$, where $\sigma>0$.
+\begin{corollary}[A smooth positive density]\label{cor:gaussian}
+For every $D\ge24$, the same $\Phi_D$ from Theorem~\ref{thm:concentrated}
+obstructs simultaneous equalization with $\gamma_{D,\sigma}$ whenever
+$0<\sigma<\eta_D/\sqrt{6D}$. In dimension $24$, it suffices that
+$0<\sigma<\eta_{24}/12$.
+\end{corollary}
+
+The fair-partition theorem of Akopyan--Avvakumov--Karasev
+\cite[Theorem 7.1]{AAK} equalizes $D-1$ absolutely continuous measures
+and one arbitrary continuous characteristic, for any number of parts.
+Our result has a different quantifier structure: \emph{one} measure,
+and $D-1$ possibly nonadditive characteristics. The two statements
+are not interchangeable. Moreover, Theorem~\ref{thm:concentrated} concerns all
+convex partitions, not merely normal fans or successive cuts. Its
+concentration assumption is part of the statement; it does not
+exclude equalization for every prescribed measure on the fixed unit
+ball. A prescribed finite measure can instead be treated on a ball
+whose radius is allowed to vary (Corollary~\ref{cor:prescribed}).
+
+\subsection*{Outline of the proof}
+Theorem~\ref{thm:A} is proved by scalar height tables in
+Section~\ref{sec:scalar}. For the second result we prove a separate
+auxiliary statement, which is the key to reducing the ambient
+dimension of the convex-partition construction.
+
+\begin{mainthm}\label{thm:C}
+There is an almost six-embedding
+\[
+                         g:\Delta^{119}\longrightarrow\R^{22}.
+\]
+\end{mainthm}
+
+Section~\ref{sec:vector} deduces Theorem~\ref{thm:C} from the
+equivariant-map theorem of Avvakumov--Karasev--Skopenkov
+\cite[Theorem 2.2]{AKS}, without using any higher-multiplicity
+intersection-removal theorem. Joining with a constant map on a
+four-simplex then gives almost six-embeddings
+$\Delta^{5D-1}\to\R^{D-2}$ for $D\ge24$. In
+Section~\ref{sec:cones} we show that the internal skeleta of all
+six-cone partitions of $\R^D$ have parameter dimension at most
+$5D-1$. Hence one can find $5D$ points that do not lie together
+on such a skeleton. The resulting distance-to-boundary
+functionals give Theorem~\ref{thm:concentrated} and hence Theorem~\ref{thm:B} in
+Section~\ref{sec:transfer}.
+
+Thus the historical role of the Frick--Gromov--Mabillard--Wagner
+method is motivational, not an unmentioned input to our proofs.
+The systematic study of spaces of convex partitions is discussed
+in \cite{LZ}. Neither the target dimensions $6$ and $24$ nor the
+number of functionals in Theorem~\ref{thm:B} is claimed to be
+optimal.
+
+\subsection*{Formalization status}
+Both main results, Theorem~\ref{thm:A}
+(\texttt{AkopyanSixfold.\allowbreak tverberg\_\allowbreak counterexample}) and
+Theorem~\ref{thm:B}
+(\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}),
+are formalized in Lean~4 (\texttt{v4.35.0}) with Mathlib~(\texttt{v4.35.0}) in
+\texttt{Challenge.lean} and proved completely without \texttt{sorry} in
+\texttt{Solution.lean}, using only the standard foundational axioms
+\texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
+Theorem~\ref{thm:A} is verified through the explicit scalar height-table
+reduction and piecewise-linear surgery in \texttt{RequestProject/};
+Theorem~\ref{thm:B} is verified unconditionally for convex bodies in
+$\R^d$ ($d\ge24$) under the Hausdorff metric and a Borel probability
+measure (without restricting to absolutely continuous measures; Section~\ref{sec:formal}). The stronger
+uniform absolutely continuous obstruction (Theorem~\ref{thm:concentrated})
+and Theorem~\ref{thm:C} are not part of the checked \texttt{Challenge.lean}
+targets.
+
+\section{Height tables and their forbidden subspaces}\label{sec:tables}
+
+Let $c,k\ge1$ be integers. Partition the vertices of $\Delta^{6c-1}$
+into $c$ labeled groups, each of size six, and denote them by $v_{i,a}$,
+where $i\in[c]=\{1,\ldots,c\}$ and $a\in[6]$.
+For a point $x$ of this simplex, define its masses by
+$\lambda_i(x)=\sum_{a=1}^6x_{i,a}$. Thus
+$\lambda(x)\in\Delta^{c-1}$.
+
+Let $\mathcal W_c=[6]^c$ be the set of words and let
+$V_{c,k}=(\R^k)^{\mathcal W_c}$ be the vector space of tables.
+A \emph{matching} is a six-element subset $M\subset\mathcal W_c$ whose
+entries in each coordinate run through all six labels. For each matching
+choose an order $m_1,\ldots,m_6$ and define a linear map
+\[
+ \ell_M:V_{c,k}\longrightarrow(\R^k)^5,
+ \qquad
+ \ell_M(z)=(z_{m_1}-z_{m_6},\ldots,z_{m_5}-z_{m_6}).
+\]
+Put $L_M=\ker\ell_M$ and
+$Z_{c,k}=V_{c,k}\setminus\bigcup_M L_M$. The definition of $L_M$ is
+independent of the chosen order. A table in $Z_{c,k}$ will be called
+\emph{safe}.
+
+A table map $H:\Delta^{c-1}\to V_{c,k}$ is \emph{compatible} if
+$H(\lambda)_a$ is independent of $a_i$ whenever $\lambda_i=0$.
+This is an exact boundary condition, not a limiting convention.
+
+\begin{lemma}[Height-table realization]\label{lem:realization}
+A continuous compatible map $H:\Delta^{c-1}\to Z_{c,k}$ determines an
+almost six-embedding $\Delta^{6c-1}\to\R^{c+k-1}$.
+\end{lemma}
+\begin{proof}
+For each group define a probability vector by
+$p_{i,a}(x)=x_{i,a}/\lambda_i(x)$ if $\lambda_i(x)>0$, and
+$p_{i,a}(x)=1/6$ otherwise. Set
+\begin{equation}\label{eq:average}
+ h(x)=\sum_{a\in\mathcal W_c}H(\lambda(x))_a
+                         \prod_{i=1}^c p_{i,a_i}(x),
+ \qquad
+ f(x)=(\lambda_1(x),\ldots,\lambda_{c-1}(x),h(x)).
+\end{equation}
+The vector $h(x)$ belongs to $\R^k$. To check continuity at $x_0$, first
+replace $H(\lambda(x))$ by $H(\lambda(x_0))$ in the finite average.
+The error is at most the sup norm of their difference. In the resulting
+average all factors belonging to a zero mass of $x_0$ disappear, since
+the limiting table ignores their labels and each probability vector
+sums to one. The remaining factors are continuous at $x_0$.
+
+Suppose six disjoint-support points have the same $f$-image. Their
+mass vectors agree. In every active group each point uses at least
+one vertex; since there are only six vertices, each uses exactly one,
+and all six choices are different. Complete the choices in inactive
+groups by arbitrary permutations. They give a matching $M$. Compatibility
+and \eqref{eq:average} identify the six heights with the six entries of
+$H(\lambda)$ indexed by $M$. Their equality contradicts safety.
+\end{proof}
+
+\begin{lemma}[Separation of forbidden subspaces]\label{lem:codim}
+Each $L_M$ has codimension $5k$. For distinct matchings $M,N$,
+$\codim(L_M\cap L_N)\ge7k$.
+\end{lemma}
+\begin{proof}
+The first assertion follows from the five independent vector equalities.
+Two distinct matchings cannot share five words, because the missing label
+in each coordinate determines the sixth word. If they share $t\ge1$
+words, their joint equations identify $12-t$ entries and have codimension
+$k(11-t)\ge7k$. If they are disjoint, the codimension is $10k$.
+\end{proof}
+
+We shall need one standard consequence of Alexander duality in a precise
+range. All homology groups below have integer coefficients.
+
+\begin{lemma}[Comparison by normal directions]\label{lem:comparison}
+Let $L_1,\ldots,L_m$ be distinct linear subspaces of $\R^N$, each of
+codimension $a\ge3$, and suppose their pairwise intersections have
+codimension at least $b$, where $a+2\le b\le2a-1$. Choose surjective
+normal maps $q_i:\R^N\to\R^a$ with kernel $L_i$. Then
+\[
+ e:\R^N\setminus\bigcup_iL_i\longrightarrow
+           \prod_{i=1}^m\sphere^{a-1},
+ \qquad e(z)_i=\frac{q_i(z)}{\|q_i(z)\|},
+\]
+is $(b-2)$-connected. Here connectivity means that the relative
+homotopy groups of its mapping cylinder vanish through degree $b-2$.
+For $m=1$ the map is a homotopy equivalence.
+\end{lemma}
+\begin{proof}
+Write $Z$ for the source and $Y$ for the target. Relative general
+position shows that $Z$ is $(a-2)$-connected: a filling of a sphere of
+dimension at most $a-2$ can be perturbed, relative to its boundary,
+to miss the finite arrangement. The same connectivity holds for $Y$.
+
+For $m>1$, let $K=(\bigcup_iL_i)\cap\sphere^{N-1}$. Each constituent
+is a sphere of dimension $N-a-1$; the intersection of one constituent
+with any union of the others has dimension at most $N-b-1$. Applying
+Mayer--Vietoris successively, and then Alexander duality, gives
+\begin{equation}\label{eq:homologyrange}
+ H_{a-1}(Z)\cong\Z^m,
+ \qquad H_j(Z)=0\quad(a\le j\le b-3).
+\end{equation}
+The first isomorphism is given by small normal meridians about points
+of $L_i$ lying on no other $L_j$. On the $i$th meridian the $i$th
+component of $e$ has degree $1$, after choosing its orientation, and
+every other component extends over the normal ball. Thus $e$ induces
+an isomorphism in degree $a-1$.
+
+The first possible product class in $Y$ above degree $a-1$ has degree
+$2a-2$. The bound $b\le2a-1$ therefore gives $H_j(Y)=0$ for
+$a\le j\le b-2$. The homology sequence of the mapping cylinder and
+\eqref{eq:homologyrange} now show that its relative homology vanishes
+through degree $b-2$. Both spaces are simply connected and have CW homotopy type. Successive
+applications of the relative Hurewicz theorem give the corresponding
+vanishing of relative homotopy. These are the usual duality and
+Hurewicz arguments; see \cite{Hatcher}.
+\end{proof}
+
+\begin{remark}\label{rem:range}
+The last degree matters. New homology of the source can occur in
+degree $b-2$; the lemma does not assert its absence. It asserts a
+relative connectivity statement, which is exactly what is needed to
+lift maps of disks of dimension at most $b-2$ up to homotopy.
+\end{remark}
+
+\section{A scalar table in dimension six}\label{sec:scalar}
+
+We prove Theorem~\ref{thm:A} by constructing a compatible map
+$H:\Delta^5\to Z_{6,1}$. Write $I=[6]$, $V=V_{6,1}$ and $Z=Z_{6,1}$.
+All matchings in this section are ordered by the label in their first
+coordinate.
+
+\subsection{Initial data}
+Choose rational numbers $q_{i,a}$ and define the affine table
+$H^0(\lambda)_w=\sum_i\lambda_iq_{i,w_i}$. For a matching $M$, put
+$v_i=\ell_M(H^0(e_i))\in\R^5$. For a nonempty proper subset $A\subset I$
+define the vector
+\[
+ u_A=6(\one_{1\in A}-\one_{6\in A},\ldots,
+                   \one_{5\in A}-\one_{6\in A})\in\R^5.
+\]
+We require, for every $M$, that any five $v_i$ be linearly independent,
+that $u_A$ and any four $v_i$ be independent when $1\le|A|\le3$, and
+that $v_1,\ldots,v_6$ be affinely independent.
+
+\begin{lemma}\label{lem:generic}
+The numbers $q_{i,a}$ can be chosen to satisfy all these requirements.
+One explicit choice is
+\[
+ B=65536,\qquad t_i=B^{7^{i-1}},\qquad q_{i,a}=t_i^a.
+\]
+\end{lemma}
+\begin{proof}
+For a permutation $\pi$ of $I$, the coefficient vectors of the
+polynomial vector
+$(t^{\pi(1)}-t^{\pi(6)},\ldots,t^{\pi(5)}-t^{\pi(6)})$
+span $\R^5$: they are the five standard basis vectors and the negative
+of their sum, in some order. Multilinearity makes every required
+determinant, with a separate variable $t_i$ in each column, a nonzero
+integer polynomial. The same argument applies to the affine determinant,
+using the vectors $(1,v_i)$.
+
+Each variable has degree at most six. The sum of absolute values of
+coefficients is at most $23040$. For example the affine determinant
+has bound $6\cdot5!\cdot2^5=23040$, and an anchored determinant has
+bound $5!\cdot6\cdot2^4=11520$. Under the stated substitution distinct
+monomials become distinct powers of $B$. The leading nonzero term
+cannot be canceled by all lower terms, since $B>23040$.
+\end{proof}
+
+On a proper face of $\Delta^5$, at most five masses are positive.
+The first independence condition therefore gives
+$H^0(\partial\Delta^5)\subset Z$. This map already has the required
+compatibility. We next modify its facets without changing their boundaries.
+
+\subsection{Forty-one shells on a facet}
+Let $J\subset I$ have five elements and let $\Delta_J$ be the corresponding
+facet. Denote its barycenter by $b_J$, put $j_0=\min J$, and set
+$q_J=H^0(b_J)$, $p_J=H^0(e_{j_0})$. For $A\subset I$ with
+$1\le|A|\le3$ define the anchor table
+$c_{J,A}(w)=6\one_{w_{j_0}\in A}-|A|$.
+
+Define a map $T_{J,A}:[0,1]\times\partial\Delta_J\to V$ by
+\begin{equation}\label{eq:anchor}
+T_{J,A}(s,\theta)=
+\begin{cases}
+ (1-4s)q_J+4sp_J,&0\le s\le\tfrac14,\\
+ (2-4s)p_J+(4s-1)c_{J,A},&\tfrac14\le s\le\tfrac12,\\
+ (2-2s)c_{J,A}+(2s-1)H^0(\theta),&\tfrac12\le s\le1.
+\end{cases}
+\end{equation}
+It starts at $q_J$, independently of $\theta$, and ends at $H^0(\theta)$.
+Every value is safe. Indeed, after applying $\ell_M$, the first segment
+is a nontrivial combination of five independent $v_i$ with nonnegative
+coefficients. The second joins one $v_i$ to an anchor vector $u_P$,
+where $P$ is a permutation of $A$. On the third segment, $H^0(\theta)$
+uses at most four columns, which are independent together with $u_P$.
+
+List the $21$ subsets of sizes one and two as $P_1,\ldots,P_{21}$,
+and the $20$ subsets of size three as $N_1,\ldots,N_{20}$. Use radial
+coordinates $\lambda=(1-r)b_J+r\theta$ on $\Delta_J$. Divide the radial
+interval into $41$ equal subintervals and, from the center outwards,
+use
+\begin{equation}\label{eq:shells}
+ T_{J,P_1},\ T_{J,N_1}^{\mathrm{rev}},\ T_{J,P_2},\
+ T_{J,N_2}^{\mathrm{rev}},\ \ldots,\
+ T_{J,P_{20}},\ T_{J,N_{20}}^{\mathrm{rev}},\ T_{J,P_{21}}.
+\end{equation}
+Here reversal means replacing $s$ by $1-s$. Adjacent shells agree
+exactly: their common value is alternately $H^0(\theta)$ and $q_J$.
+The center has value $q_J$ and the outer boundary has value $H^0(\theta)$.
+The resulting facet maps glue to a continuous compatible safe map
+$b:\partial\Delta^5\to Z$.
+
+\subsection{The degree calculation}
+Fix a matching $M$. For ordered vectors $z_0,\ldots,z_5\in\R^5$ such
+that zero misses the affine images of proper faces, let
+$D(z_0,\ldots,z_5)\in\Z$ be the degree at zero of the affine simplex,
+with its ordered-vertex orientation. Put
+\[
+ o_M=D(v_1,\ldots,v_6),\qquad
+ \phi_A(J)=D(u_A,v_{j_1},\ldots,v_{j_5})
+ \quad(j_1<\cdots<j_5).
+\]
+The boundary of the abstract oriented simplex $[U,V_1,\ldots,V_6]$
+gives, after affine mapping to $\R^5$, the local-homology identity
+\begin{equation}\label{eq:degreeidentity}
+ \sum_{i=1}^6(-1)^{i-1}\phi_A(I\setminus\{i\})=o_M.
+\end{equation}
+All terms are legitimate relative chains since their boundaries miss
+zero. Their sum is a boundary, so its local degree is zero.
+
+Replacing the original affine filling on an oriented facet by one
+outward anchor filling changes its normal degree by $-\phi_P(J)$.
+To see the sign, collapse the initial path in \eqref{eq:anchor}; this
+is a homotopy in the complement of zero. The difference of the new
+cone and the original facet is the negative of
+$\partial[u_P,v_{j_1},\ldots,v_{j_5}]$. A reversed filling contributes
+the opposite sign. This is an ordered-vertex computation; it does
+not identify that orientation with a coordinate chart without its sign.
+
+Write $\Phi_k(J)=\sum_{|A|=k}\phi_A(J)$. For a fixed matching the
+selected color merely permutes the row labels, so summing over all
+subsets of a given size removes this permutation. The interleaved
+sequence \eqref{eq:shells} changes the facet class by
+$-\Phi_1(J)-\Phi_2(J)+\Phi_3(J)$. One can compute this by collapsing
+the spherical seams mapped constantly to $q_J$: each pair of an outward
+and an inward shell then contributes the difference of its two fillings. There are $21$ outward and $20$
+inward fillings, so the original facet is counted once. Including the
+boundary sign of each facet and applying \eqref{eq:degreeidentity},
+we obtain
+\begin{equation}\label{eq:cancellation}
+ \deg\left(\frac{\ell_M b}{\|\ell_M b\|}\right)
+ =\left(1-\binom61-\binom62+\binom63\right)o_M=0.
+\end{equation}
+This holds for every matching, not just for a sampled collection.
+
+By Lemmas~\ref{lem:codim} and~\ref{lem:comparison}, with $a=5,b=7$,
+the normal-direction map from $Z$ to the product of $4$-spheres is
+$5$-connected, and in particular an isomorphism on $\pi_4$.
+Equation~\eqref{eq:cancellation} says that the image of $b$ represents
+zero in the $\pi_4$ of every factor. Hence $b$ is null-homotopic in $Z$
+and extends to $H:\Delta^5\to Z$. Its boundary is unchanged, so it
+is compatible. Lemma~\ref{lem:realization} with $c=6,k=1$ proves
+Theorem~\ref{thm:A}.
+
+\section{Three height coordinates and twenty colors}\label{sec:vector}
+
+The larger simplex required for Theorem~\ref{thm:concentrated} is obtained by a
+relative lifting construction. We give the construction for a range
+of parameters, since the dimension restriction is then transparent.
+
+\begin{proposition}\label{prop:vector}
+Let $k\ge2$ and $1\le c\le7k-1$ be integers. There is a continuous
+compatible safe table $H:\Delta^{c-1}\to Z_{c,k}$, and consequently
+an almost six-embedding $\Delta^{6c-1}\to\R^{c+k-1}$.
+\end{proposition}
+
+Let $W_6=\{(y_1,\ldots,y_6)\in\R^6:\sum_i y_i=0\}$, with the
+permutation action. We use the following published input:
+for a finite complex $X$ with a free $\Sym_6$-action there is an
+equivariant map $X\to\sphere(W_6\oplus W_6)$
+\cite[Theorem 2.2]{AKS}. The paper states the target as six planar
+points not all equal; subtracting the mean and normalizing gives this
+sphere. Since $k\ge2$, its inclusion in
+$\sphere(W_6\otimes\R^k)$ is equivariant.
+
+\subsection{A natural diagram of tests}
+For each nonempty subset $S\subset[c]$, let
+$\mathcal W_S=[6]^S$, $V_S=(\R^k)^{\mathcal W_S}$, and let $Z_S$ be
+its safe-table space. The set of ordered matchings is
+$\Omega_S=(\Sym_6)^S$: a tuple of permutations specifies the label
+in each row of each active color. Relabeling the six rows gives a
+free action on $\Omega_S$: explicitly $g\cdot(\pi_i)_i=(\pi_i g^{-1})_i$. Define
+\[
+ T_S=\operatorname{Map}_{\Sym_6}
+       \bigl(\Omega_S,\sphere(W_6\otimes\R^k)\bigr).
+\]
+Since $\Omega_S$ is finite and free, $T_S$ is a finite product of
+$(5k-1)$-spheres, one for each unordered matching.
+
+Evaluating a table on an ordered matching, subtracting the mean of
+its six vectors, and normalizing defines $e_S:Z_S\to T_S$.
+Lemma~\ref{lem:comparison}, with $a=5k$ and $b=7k$, implies that
+$e_S$ is $(7k-2)$-connected. For a single color there is only one
+unordered matching and $e_S$ is a homotopy equivalence.
+
+If $S\subset T$, duplicating a table independently of the extra labels
+defines $j_{ST}:Z_S\to Z_T$. Precomposition with restriction of
+ordered matchings defines $i_{ST}:T_S\to T_T$. These maps satisfy
+\begin{equation}\label{eq:naturality}
+                       e_Tj_{ST}=i_{ST}e_S
+\end{equation}
+exactly. A projected matching is still a matching, which also shows
+that duplication preserves safety.
+
+Consider the finite free complex $X=(\Sym_6)^{*c}$. Its points consist
+of a mass vector and one permutation for each positive mass, with
+inactive permutations forgotten. The published input supplies a map
+$X\to\sphere(W_6\otimes\R^k)$. On every face $\Delta_S$ of the mass
+simplex it defines a map $\beta_S:\Delta_S\to T_S$. On a smaller face
+these maps agree after applying $i_{ST}$.
+
+\subsection{Lifting, including the boundary homotopies}
+We construct, by induction over faces, maps $H_S:\Delta_S\to Z_S$
+and homotopies $e_SH_S\simeq\beta_S$, all compatible with inclusions
+of faces. Suppose the construction has been made on the proper faces
+of $\Delta_S$. Equation~\eqref{eq:naturality} gives a map of its
+boundary to $Z_S$ and a specified homotopy there to $\beta_S$.
+
+The relative lifting fact being used is this: if $e:A\to B$ is an
+$n$-connected map of spaces of CW homotopy type and a disk has dimension
+at most $n$, a map of the disk
+to $B$ lifts up to homotopy from prescribed boundary lift and boundary
+homotopy. Indeed replace $e$ by its mapping-path fibration. Its
+homotopy fiber is $(n-1)$-connected; the obstruction to extending a
+section over a $d$-cell belongs to $\pi_{d-1}$ of that fiber and
+vanishes for $d\le n$. Projection to $A$ recovers the desired lift
+and its homotopy, with the prescribed boundary data unchanged.
+
+Here $\dim\Delta_S\le c-1\le7k-2$. The lifting fact therefore applies
+to $e_S$ at every stage, including the largest face. The resulting map
+$H=H_{[c]}$ is continuous, safe, and compatible. This proves
+Proposition~\ref{prop:vector}. Taking $k=3,c=20$ gives
+$6c-1=119$ and $c+k-1=22$, and proves Theorem~\ref{thm:C}.
+
+\begin{remark}[A second proof of Theorem~\ref{thm:A}]
+The same diagram gives an independent route to the scalar existence
+statement. The \"Ozaydin theorem, as stated in \cite[Theorem 2.2$'$]{AKS},
+gives an equivariant map from the five-dimensional free complex
+$(\Sym_6)^{*6}$ to $\sphere(W_6)$. For $k=1$, each comparison $e_S$
+is $5$-connected by Lemma~\ref{lem:comparison}. The facewise induction
+therefore lifts this test over $\Delta^5$, and Lemma~\ref{lem:realization}
+gives Theorem~\ref{thm:A}. This proof shares the arrangement-comparison
+lemma but does not use the shell signs or the degree cancellation.
+The explicit scalar construction above supplies the rational boundary
+prescription absent from this shorter existence argument.
+\end{remark}
+
+\begin{remark}
+The homotopies are part of the induction, not an optional addition.
+An arbitrary equivariant test is not automatically a height table.
+The connectivity of $e_S$ and the relative lifting argument supply
+precisely this missing realization step, while retaining compatibility
+on every zero-mass face.
+\end{remark}
+
+\subsection{Padding by five vertices}
+The following elementary join construction is the special case of
+\cite[Remark 1.2(a)]{AKS} in which the second factor has only five
+vertices. Its proof is included to fix the dimension count.
+\begin{lemma}\label{lem:padding}
+If there is an almost six-embedding $g:\Delta^N\to\R^q$, there is an
+almost six-embedding $g^+:\Delta^{N+5}\to\R^{q+1}$.
+\end{lemma}
+\begin{proof}
+Regard $\Delta^{N+5}$ as the join $\Delta^N*\Delta^4$. Write a join
+point as $t x*(1-t)y$, with $t\in[0,1]$, $x\in\Delta^N$, and
+$y\in\Delta^4$, and set
+\[
+                    g^+(t x*(1-t)y)=(t,tg(x)).
+\]
+The formula is continuous, including at $t=0$, since $g$ is bounded.
+In a sixfold coincidence the first coordinates force a common value
+of $t$. If $t>0$, the six old components have disjoint supports and
+a common $g$-image, which is impossible. If $t=0$, all six supports
+would lie among the five new vertices, which is also impossible.
+\end{proof}
+
+\begin{corollary}\label{cor:wideall}
+For every integer $D\ge24$ there is an almost six-embedding
+\[
+                       g_D:\Delta^{5D-1}\longrightarrow\R^{D-2}.
+\]
+\end{corollary}
+\begin{proof}
+Starting from Theorem~\ref{thm:C}, apply Lemma~\ref{lem:padding}
+$D-24$ times. The source dimension becomes
+$119+5(D-24)=5D-1$, and the target dimension becomes
+$22+(D-24)=D-2$.
+\end{proof}
+
+\section{How many parameters does a six-cone partition need?}\label{sec:cones}
+
+A \emph{central cone partition} of $\R^D$ is a finite tuple of closed,
+full-dimensional convex polyhedral cones covering $\R^D$ with disjoint
+interiors. Its internal skeleton is the complement of the union of
+the interiors. No face-to-face condition is imposed.
+
+A dimension bound for this family means that finitely many semialgebraic
+parameter spaces of the stated dimensions represent all its skeleta.
+Repeated representations cause no difficulty. Unit normals remove
+positive rescaling; all incidence, coverage, and full-dimensionality
+conditions are semialgebraic by real quantifier elimination; the dimension and projection facts used below are standard, as in \cite{BPR}.
+
+\begin{theorem}\label{thm:conedim}
+For $D\ge4$, the internal skeleta of central cone partitions of $\R^D$
+into at most six cones have a finite semialgebraic parametrization of
+dimension at most
+\begin{equation}\label{eq:conebound}
+                         \max\{5D-1,\,4D+23\}.
+\end{equation}
+\end{theorem}
+
+\subsection{The effective normal space}
+For a partition $K_1,\ldots,K_r$, choose nonzero separating normals
+$n_{ij}=-n_{ji}$ so that $K_i\subset\{x:\langle n_{ij},x\rangle\ge0\}$.
+Then
+\begin{equation}\label{eq:pairseparators}
+ K_i=\bigcap_{j\ne i}\{x:\langle n_{ij},x\rangle\ge0\}.
+\end{equation}
+For if the right side contained a point outside $K_i$, a segment to an
+interior point of $K_i$ would give an open set of such points satisfying
+all inequalities strictly. An interior point of another cone in this
+open set would violate its pairwise separator with $K_i$.
+
+\begin{lemma}[Normal rank]\label{lem:rank}
+The span $F$ of all pair-separating normals has dimension at most $r-1$.
+It equals the span of the genuine facet normals of all cells.
+\end{lemma}
+\begin{proof}
+Put $a_i=\sum_{j\ne i}n_{ij}$, so $\sum_i a_i=0$. We prove that the
+$a_i$ span $F$. Suppose a vector $v$ annihilates all $a_i$, and let
+$S=\{i:v\in K_i\}$. This set is nonempty. For $i\in S$, all
+$\langle n_{ij},v\rangle$ are nonnegative and sum to zero, so all vanish.
+If $k\notin S$, take $x\in\intt K_k$. For $i\in S$,
+$\langle n_{ik},x+tv\rangle<0$ for every $t$. For $i\notin S$, one
+of its defining normals is negative on $v$, so $x+tv\notin K_i$ for
+all large $t$. This contradicts coverage. Thus $S=[r]$ and $v$
+annihilates every normal. The span assertion follows by orthogonal
+complements. Genuine facets occur among the defining hyperplanes in
+\eqref{eq:pairseparators}; conversely every valid defining normal lies
+in the dual cone, hence in the span of the genuine facet normals.
+\end{proof}
+
+We call $q=\dim F$ the normal rank. The common lineality of the
+partition is $F^\perp$. Choosing $F$ costs $q(D-q)$ parameters.
+For $1\le q\le3$, choosing all fifteen pairwise directions inside $F$ gives
+at most $q(D-q)+15(q-1)$ parameters, which is at most $3D+21$ for
+$D\ge4$. We need sharper arguments in ranks four and five.
+
+\subsection{The maximal-rank case}
+\begin{lemma}\label{lem:maxrank}
+Let $r\ge2$ be an integer. Partitions into $r$ cones with normal rank $r-1$ have a semialgebraic
+parametrization of dimension at most $(r-1)D-1$.
+\end{lemma}
+\begin{proof}
+Work first in the effective $(r-1)$-space. The map
+$x\mapsto(\langle a_i,x\rangle)_i$ identifies it with
+$W_r=\{y\in\R^r:\sum_i y_i=0\}$. Each $K_i$ lies in $y_i\ge0$.
+Points with $y_i>0$ and every other coordinate negative belong to
+$\intt K_i$.
+
+For three indices $i,j,k$, fix all other coordinates at strictly
+negative values. The resulting affine plane is covered by exactly
+the three possible cells. Each has a two-dimensional private recession
+sector. The map from this plane defined by the three cyclic separators
+$(n_{ij},n_{jk},n_{ki})$ has rank two: rank at most one would give
+three disjoint intervals along one coordinate, each with a
+full-dimensional recession sector, whereas at most two disjoint
+intervals can be unbounded.
+
+Its affine-plane image in $\R^3$ misses both strictly positive and
+strictly negative orthants; either sign pattern leaves no cell able
+to contain the point. An affine plane missing both orthants passes
+through zero. Indeed its equation $c\cdot z=b$ meets both orthants
+if $c$ has both signs; otherwise it meets one of them unless $b=0$.
+As the fixed negative coordinates vary, the common kernel of the
+three global separators projects onto an open subset of $\R^{r-3}$.
+Their rank is therefore at most two. Thus every triangle of pairwise
+normal directions is linearly dependent.
+
+We record the dimension count for these directions. Set $q=r-1$.
+Assign a nonzero projective direction to each edge of the complete
+graph on $q+1$ vertices, assume that they span $\R^q$, and impose
+dependence on every triangle. Their parameter space has dimension at
+most $q^2-1$. To prove this, first note that independent edges form a
+forest: triangulating a hypothetical independent cycle successively
+puts each nonzero chord in the span of its preceding path, contradicting
+the last triangle. In particular directions on $m$ vertices span at
+most $m-1$ dimensions.
+
+Proceed by induction on $q$. If all vertex stars have rank $q$, choose
+the $q$ independent projective directions at one vertex, represented by
+vectors $w_1,\ldots,w_q\in\R^q$. This costs $q(q-1)$ parameters. Every other edge has direction
+$[t_iw_i-t_jw_j]$ with all $t_i\ne0$; this follows from the triangle
+relations and their multiplicatively consistent coefficient ratios.
+The ratios have $q-1$ parameters, giving $q^2-1$.
+
+Otherwise choose a deficient star. Group its neighbors into $s$ classes
+$C$ of parallel directions, let $U$ be the star span of dimension $k$,
+and let $V_C$ be the span of the edges within $C$. Cross-class edges
+belong to $U$, and $\dim V_C\le |C|-1$. Consequently
+$q\le k+\sum_C\dim V_C\le k+q-s\le q$.
+Equality forces $k=s$, $\dim V_C=q_C=|C|-1$, and the direct sum
+$\R^q=U\oplus\bigoplus_{q_C>0}V_C$.
+A triangle with two vertices in one class shows that its cross-class
+edges are parallel, so they descend to a configuration on the classes
+and the original vertex. Apply induction to that configuration and
+to each nontrivial class. The choice of the ordered direct sum has
+dimension $q^2-s^2-\sum_Cq_C^2$; adding the internal bounds gives
+at most $q^2-1$. There are only finitely many class patterns.
+
+Finally choose the effective space in $q(D-q)$ parameters. The total
+is $q(D-q)+q^2-1=qD-1$. Orienting projective directions is a finite
+choice, and the cones are recovered from their separators.
+\end{proof}
+
+\subsection{Ridge constraints in rank four}
+We use a local fact which does not require face-to-face intersections.
+
+\begin{lemma}[A ridge needs another wall]\label{lem:ridge}
+Let $K_0$ be a cell and let $P$ be the two-dimensional normal space
+of one of its genuine codimension-two faces. At least one genuine
+interface between cells other than $K_0$ has its normal in $P$.
+\end{lemma}
+\begin{proof}
+Choose a point in the relative interior of the face, avoiding all
+other wall hyperplanes which do not contain its linear span. In the
+normal two-plane the local section of $K_0$ is a pointed convex angle,
+strictly smaller than $\pi$. Its complementary angle is larger than
+$\pi$ and cannot belong to one convex cell. There is therefore an
+interface between two other local cells. Every wall through the chosen
+point contains the face span, by the generic choice, so the interface
+normal lies in $P$. The local interface has a relatively open
+codimension-one patch, hence is a genuine global interface.
+\end{proof}
+
+\begin{lemma}\label{lem:rankfour}
+Six-cone partitions of normal rank four in $\R^D$, $D\ge4$, have a
+semialgebraic parametrization of dimension at most $4D+23$.
+\end{lemma}
+\begin{proof}
+Fix a labeled reference cell $K_0$, let $h$ be its normal rank, and
+let $t\le5$ be its number of genuine facets. Choose its normal space
+$E$, its $t$ unit facet normals, and then the total four-space $F$
+containing $E$. These choices cost
+$h(D-h)+t(h-1)+(4-h)(D-4)$ parameters.
+The ten pairwise separator directions among the other five cells
+cost at most $30$ more. The initial bound is thus
+\begin{equation}\label{eq:rankfourbase}
+                  4D+14+h(4-h)+t(h-1).
+\end{equation}
+These data determine the partition: for $i\ne0$, the cell $K_i$ is
+the closure of the points outside $K_0$ that satisfy strictly all its
+pairwise inequalities against the other four cells. Coverage proves
+one inclusion, and $\intt K_i$ proves the other. Thus no extra
+separators incident with $K_0$ need to be counted.
+
+If $h=1$, then $t=1$ and \eqref{eq:rankfourbase} is $4D+17$.
+If $h=2$, then $t=2$ and it is $4D+20$.
+
+Suppose $h=3$. A section of the pointed dual cone of $K_0$ is a polygon
+with $t$ vertices. If $t=3$, the bound is already $4D+23$. If $t=4$,
+one ridge, by Lemma~\ref{lem:ridge}, puts one internal normal in a
+specified two-plane of $F$. This costs two parameters in projective
+three-space and reduces $4D+25$ to $4D+23$.
+If $t=5$, take three consecutive edge planes of the dual pentagon.
+Their common intersection is zero: the first two intersect in the
+second vertex ray, which is not in the plane of the third edge.
+Each plane must contain an internal separator. If three distinct
+separator slots witness them, six parameters are lost. If two planes
+use the same slot, that direction is confined to their line of
+intersection, costing three parameters, and the third plane costs
+two more. One slot cannot serve all three. The loss is at least five,
+reducing $4D+27$ to $4D+22$.
+
+Suppose $h=4$. A section of the dual cone is a three-dimensional
+polytope with four or five vertices. Its graph contains a four-cycle
+on four affinely independent vertices. For a tetrahedron this is
+immediate. A three-polytope with five vertices has eight or nine edges, by
+Euler's formula and minimum vertex degree three. With eight edges its
+graph is a four-cycle joined to an apex; with nine it is $K_5$ with
+one edge removed. Thus it is a square pyramid or a triangular
+bipyramid. In the pyramid use the apex and three consecutive base
+vertices. In the bipyramid use both apices and two equatorial vertices;
+no four vertices are coplanar, since they would form a quadrilateral
+facet. In either case the selected four-cycle is affinely independent.
+Choose nonzero vectors $u_1,u_2,u_3,u_4$ on the corresponding dual
+rays, in cyclic order. These four vectors are linearly independent. The four ridge normal planes are
+\[
+ P_{12}=\spanlin(u_1,u_2),\quad P_{23}=\spanlin(u_2,u_3),\quad
+ P_{34}=\spanlin(u_3,u_4),\quad P_{41}=\spanlin(u_4,u_1).
+\]
+Opposite planes intersect only at zero; adjacent ones intersect in
+a line. Lemma~\ref{lem:ridge} assigns an internal separator to each
+plane. A separator can serve at most two planes, and only adjacent
+ones. Four distinct slots cost eight parameters; one shared slot
+and two single slots cost seven; two shared slots cost six. The
+loss is therefore at least six. Since $t\le5$, the bound
+$4D+14+3t$ falls to at most $4D+23$.
+
+All assignments of facet labels and witnessing separator slots form
+finite lists. The losses were computed in fibers over the reference
+cell and total normal space, so no independence of varying reference
+planes was assumed. Taking their finite union proves the bound.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:conedim}]
+For six cells, Lemma~\ref{lem:rank} gives rank at most five.
+Lemma~\ref{lem:maxrank} gives $5D-1$ in rank five;
+Lemma~\ref{lem:rankfour} gives $4D+23$ in rank four; the bound
+$3D+21$ in lower ranks is smaller when $D\ge4$.
+For five cells, rank four is maximal and costs at most $4D-1$ by
+Lemma~\ref{lem:maxrank}; all remaining cases with two to five cells
+have rank at most three and obey the crude bound already given.
+The one-cell skeleton is empty. This proves the parametrization
+bound for every number of cells at most six. A smaller partition can
+also be refined to six by central cuts without losing any old
+internal boundary.
+\end{proof}
+
+\section{From blocking points to body functionals}\label{sec:transfer}
+
+\begin{lemma}[Generic blocking points]\label{lem:blockers}
+For every integer $D\ge24$, there are $5D$ distinct rational points
+$p_1,\ldots,p_{5D}\in\intt B_D$ which do not all lie on the internal
+skeleton of any central cone partition of $\R^D$ into at most six
+full-dimensional cells.
+\end{lemma}
+\begin{proof}
+For $D\ge24$, Theorem~\ref{thm:conedim} gives parameter dimension
+$\max\{5D-1,4D+23\}=5D-1$. For a fixed skeleton each point has at
+most $D-1$ dimensions of choice. The incidence set of a skeleton and
+$5D$ points on it therefore has dimension at most
+\[
+                (5D-1)+5D(D-1)=5D^2-1<5D^2.
+\]
+Its projection, and the closure of that projection, have smaller
+dimension than the space of point tuples. Their complement contains
+a nonempty open subset of $(\intt B_D)^{5D}$. Choose a rational tuple
+with distinct entries there. All smaller partitions were included in
+Theorem~\ref{thm:conedim}. For $D=24$ the two incidence dimensions are
+$2879$ and $2880$, and there are $120$ points.
+\end{proof}
+
+\subsection{The compact geometric obstruction}
+For this subsection only, a \emph{generalized six-partition} of $B_D$
+is a tuple of six nonempty compact convex sets covering $B_D$ with
+pairwise disjoint interiors; empty interiors are allowed. These
+tuples form a compact space $\mathcal Q_D$. Indeed the hyperspace of
+nonempty compact convex subsets of $B_D$ is compact. Coverage persists
+under Hausdorff limits. Disjointness of interiors also persists,
+because a compact ball in the interior of a full-dimensional convex
+limit is contained in its approximants for all sufficiently large
+indices.
+
+\begin{lemma}[A positive distance from centrality]\label{lem:nearcentral}
+Let $D,m\ge1$ be integers, and let $p_1,\ldots,p_m\in\intt B_D$
+block all central cone partitions with at most six cells. There is
+$\eta\in(0,1)$ such that every generalized six-partition in which
+none of the marked points is interior to any part has a part $C_i$
+with $\dist(0,C_i)>\eta$.
+\end{lemma}
+\begin{proof}
+In $\mathcal Q_D$, the condition that all inward distances
+$\dist(p_a,\R^D\setminus C_i)$ vanish is closed. On the resulting
+compact set the function $\max_i\dist(0,C_i)$ is continuous. It
+suffices to prove that it never vanishes; if the set is empty, the
+claim is vacuous.
+
+Suppose it vanishes at a tuple. Every part then contains zero.
+Discard the parts with empty interior. The remaining sets still
+cover $B_D$: their finite union is closed, and an uncovered relatively
+open portion of the ball could not be covered by finitely many
+lower-dimensional convex sets. Choose separating hyperplanes for
+pairs of surviving parts. Because both parts contain zero, each
+separator passes through zero. Intersect the corresponding halfspaces
+to obtain cones $K_i$. Coverage, as in \eqref{eq:pairseparators}, gives
+$C_i=B_D\cap K_i$. Every direction has a short representative in the
+ball, so the cones cover $\R^D$ and have disjoint interiors. All marked
+points lie on their internal skeleton, contradicting the blocking
+property. The continuous function consequently has a positive minimum;
+choose $\eta<1$ smaller than that minimum.
+\end{proof}
+
+Allowing degenerate parts here is deliberate. It gives a compact
+closed set on which a positive separation margin can be taken; no
+measure-convergence assertion is needed for this step.
+
+\begin{lemma}[Inward-distance transfer with a uniform margin]\label{lem:transfer}
+Let $D,m,q$ be positive integers. Suppose that
+$g:\Delta^{m-1}\to\R^q$ is an almost six-embedding and that
+$m$ points in $\intt B_D$ block all central cone partitions with
+at most six cells. There exist a continuous map
+$\Phi:\mathcal K_D\to\R^{q+1}$ and numbers $\eta\in(0,1)$ and
+$\varepsilon>0$ such that every generalized six-partition whose
+parts all meet $\eta B_D$ satisfies
+\begin{equation}\label{eq:margin}
+                  \max_{1\le i\le6}\|\Phi(C_i)-\Phi(C_1)\|_\infty
+                     \ge\varepsilon.
+\end{equation}
+\end{lemma}
+\begin{proof}
+Let the blocking points be $p_1,\ldots,p_m$. For $C\in\mathcal K_D$
+define its inward distances $w_a(C)=\dist(p_a,\R^D\setminus C)$,
+and put $s(C)=\sum_a w_a(C)$. Set
+\begin{equation}\label{eq:functionals}
+ \Phi(C)=
+ \begin{cases}
+ \bigl(s(C),\,s(C)g(w(C)/s(C))\bigr),&s(C)>0,\\
+ 0,&s(C)=0.
+ \end{cases}
+\end{equation}
+This definition includes lower-dimensional sets. If $h_C$ is the
+support function of $C$, then
+\begin{equation}\label{eq:inward}
+ w_a(C)=\max\left\{0,\min_{\|u\|=1}
+                    \bigl(h_C(u)-\langle u,p_a\rangle\bigr)\right\}.
+\end{equation}
+Hence $w_a$ is $1$-Lipschitz in the Hausdorff metric. Boundedness of
+$g$ on its compact domain proves continuity of \eqref{eq:functionals}
+at $s=0$; elsewhere continuity is immediate.
+
+Suppose a generalized six-partition equalizes $\Phi$. If the common
+value of $s$ is $t>0$, the six points $w(C_i)/t$ of
+$\Delta^{m-1}$ have disjoint supports: a marker cannot be interior
+to two parts. Equality of the other coordinates contradicts the
+almost six-embedding property. Thus equality forces
+\begin{equation}\label{eq:zero}
+                         w_a(C_i)=0\quad\text{for all }a,i.
+\end{equation}
+Choose $\eta$ from Lemma~\ref{lem:nearcentral}. Equation~\eqref{eq:zero}
+is impossible when all parts meet $\eta B_D$. The set of such tuples
+in $\mathcal Q_D$ is compact, since distance from zero is continuous.
+The contrast in \eqref{eq:margin} is continuous and nowhere zero on
+this set, so it has a positive minimum. If the set is empty, any
+positive $\varepsilon$ suffices.
+\end{proof}
+
+\subsection{One measure, with the quantifiers in the correct order}
+The following elementary observation is the only measure-theoretic
+step of the transfer.
+\begin{lemma}\label{lem:mass}
+Let $0<\eta<1$ and let $\mu$ be a Borel measure with
+$0<\mu(B_D)<\infty$. If
+$\mu(\eta B_D)>5\mu(B_D)/6$, then every $\mu$-fair six-partition
+of $B_D$ has each of its parts meeting $\eta B_D$.
+\end{lemma}
+\begin{proof}
+A part $C_i$ missing $\eta B_D$ is contained in
+$B_D\setminus\eta B_D$, and hence
+\[
+ \mu(C_i)\le\mu(B_D)-\mu(\eta B_D)<\frac{\mu(B_D)}6,
+\]
+contrary to fairness. Positivity and finiteness of $\mu(B_D)$ justify
+this comparison. Absolute continuity is not needed in this lemma.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:concentrated} and Theorem~\ref{thm:B}]
+Fix $D\ge24$. Use $g_D:\Delta^{5D-1}\to\R^{D-2}$ from
+Corollary~\ref{cor:wideall} and the $5D$ points of
+Lemma~\ref{lem:blockers}. Lemma~\ref{lem:transfer} gives a fixed map
+$\Phi_D$ with $(D-2)+1=D-1$ coordinates and a fixed radius $\eta_D$.
+For every measure in the statement, Lemma~\ref{lem:mass} puts every
+fair partition in the compact class covered by \eqref{eq:margin}.
+It cannot equalize $\Phi_D$. Neither the map nor the radius was
+chosen using the measure. This proves Theorem~\ref{thm:concentrated}.
+
+For Theorem~\ref{thm:B}, take $d=D\ge24$, the map $\Phi_d$, and any
+$0<\sigma<\eta_d/\sqrt{6d}$. As shown in Corollary~\ref{cor:gaussian}
+below, the centered Gaussian $\gamma_{d,\sigma}$ satisfies
+$\gamma_{d,\sigma}(\eta_d B_d)>(5/6)\gamma_{d,\sigma}(B_d)$, so its
+normalized restriction $\mu(E)=\gamma_{d,\sigma}(E\cap B_d)/\gamma_{d,\sigma}(B_d)$
+is an absolutely continuous probability measure on $B_d$ meeting the
+hypotheses of Theorem~\ref{thm:concentrated}.
+\end{proof}
+
+The first coordinate $s(C)$ in \eqref{eq:functionals} is a body
+functional, not a measure: it is not additive on partitions. It
+is one of the $D-1$ coordinates already counted above. The single
+measure $\mu$ supplies a separate equal-mass condition, which forces
+all parts to meet a common small ball. This is why no additional
+centrality coordinate is required.
+
+\begin{proof}[Proof of Corollary~\ref{cor:gaussian}]
+Let $X$ be a random vector with distribution $\gamma_{D,\sigma}$.
+Since $\mathbb E\|X\|^2=D\sigma^2$, Markov's inequality gives
+\[
+ \gamma_{D,\sigma}(\eta_D B_D)
+ \ge 1-\frac{D\sigma^2}{\eta_D^2}.
+\]
+For $0<\sigma<\eta_D/\sqrt{6D}$ this is strictly greater than
+$5/6$, and therefore greater than $5\gamma_{D,\sigma}(B_D)/6$.
+Apply Theorem~\ref{thm:concentrated}. For $D=24$, $\sqrt{6D}=12$.
+The Gaussian density is everywhere positive and analytic, and the
+same functionals work throughout the stated interval of scales.
+\end{proof}
+
+More generally, the conclusion holds for any absolutely continuous
+probability measure $\mu$ on $\R^D$ with $\int\|x\|^2\dd\mu(x)<\eta_D^2/6$.
+The concentration criterion is invariant under multiplication of a
+measure by a positive constant. It needs neither radial symmetry nor
+a Gaussian density. Requiring equality of a further measure would
+only reduce the set of admissible partitions, but it would be a
+different problem, with two measures instead of one.
+
+\begin{corollary}[A prescribed measure on a variable ball]\label{cor:prescribed}
+Let $D\ge24$ and let $\mu$ be any finite nonzero absolutely continuous
+Borel measure on $\R^D$. There exist $R>0$ and $D-1$ continuous
+body functionals which cannot be equalized, together with $\mu$,
+on a convex six-partition of $RB_D$.
+\end{corollary}
+\begin{proof}
+Let $M=\mu(\R^D)\in(0,\infty)$ and let $\eta_D$ be as above.
+Choose $R>0$ so large that $\mu(\eta_D RB_D)>5M/6$. Then
+$\mu(\eta_D RB_D)>5\mu(RB_D)/6$. Under the dilation $x\mapsto x/R$,
+the pushforward measure meets the hypotheses of
+Theorem~\ref{thm:concentrated}. Apply that theorem with
+$\Phi_R(C)=\Phi_D(R^{-1}C)$. Dilation is continuous in the
+Hausdorff metric and preserves convexity, coverage, and disjoint
+interiors. This proves the assertion.
+\end{proof}
+This corollary allows the ball to depend on the prescribed measure.
+It does not convert the theorem into a statement for every prescribed
+measure on a fixed ball. In particular, it gives the standard Gaussian
+on a sufficiently large ball, not a new claim for the standard Gaussian
+on the unit ball.
+
+\subsection{Moment polynomials and robustness}
+\begin{proposition}[A finite-moment version]\label{prop:moments}
+The map $\Phi_D$ in Theorem~\ref{thm:concentrated} may be chosen with coordinates
+that are polynomials with rational coefficients in the ordinary
+Lebesgue moments $m_\alpha(C)=\int_Cx^\alpha\dd x$, $|\alpha|\le12$.
+One such map works for every measure in the stated concentration
+class, with the same $\eta_D$. No bound on its degree as a polynomial
+in the moments is asserted.
+\end{proposition}
+\begin{proof}
+Every part of a convex six-partition of $B_D$ is the intersection
+of the ball with at most five halfspaces, by pairwise separation
+and coverage. The same is true of any full-dimensional Hausdorff
+limit of such parts: pass to convergent unit separator normals and
+offsets, and test strict inequalities in the interior of the
+limiting intersection. Let $\mathcal A$ be the closure of the family
+of all such parts in $\mathcal K_D$. It is compact, and its other
+members are lower-dimensional.
+
+Moments through order $12$ distinguish its full-dimensional members.
+Suppose that $C,K\in\mathcal A$ are full-dimensional and have equal
+moments. Let $\ell_1=0,\ldots,\ell_t=0$, $t\le5$, be the genuine
+flat facet planes of $C$. For $z\in\intt K$ use the polynomial
+vector field
+\[
+ V_z(x)=(x-z)(1-\|x\|^2)\prod_{j=1}^t\ell_j(x)^2.
+\]
+Its divergence has degree at most $2t+2\le12$, and its flux through
+$\partial C$ is zero. Equality of moments therefore gives zero
+flux through $\partial K$. On each flat facet of $K$ the outward
+normal has positive scalar product with $x-z$, and all remaining
+factors are nonnegative. The relatively open part of the facet
+inside the ball must consequently lie in one of the planes of $C$.
+A finite union of different hyperplanes cannot cover an open part
+of one hyperplane. The common centroid lies in both interiors and
+chooses the same halfspace sides. It follows that $C\subset K$,
+and equal volumes give $C=K$.
+
+Let $M$ be the vector of moments through order $12$. It is continuous
+on $\mathcal A$. Its only possible nontrivial fibers consist of
+lower-dimensional sets, on which all moments and the original
+functional \eqref{eq:functionals} vanish. Thus that functional
+descends continuously to $M(\mathcal A)$: a continuous map from a
+compact space onto a Hausdorff space is a quotient map.
+
+Use Stone--Weierstrass to approximate its coordinates uniformly
+on $M(\mathcal A)$ by polynomials, and then approximate the finitely
+many coefficients by rationals. Choose the coordinatewise error
+smaller than $\varepsilon/4$, where $\varepsilon$ is the geometric
+margin of Lemma~\ref{lem:transfer}. The contrast on every relevant
+partition changes by less than $\varepsilon/2$ and stays positive.
+Lemma~\ref{lem:mass} applies to every measure in the same class, so
+no measure-dependent compactness or approximation is required.
+The resulting polynomials in moments are continuous on all of
+$\mathcal K_D$.
+\end{proof}
+
+The same margin shows that sufficiently small uniform perturbations
+of these functionals on the compact family $\mathcal A$ preserve
+the obstruction for the whole concentration class. This is robustness
+of a counterexample, not an assertion that every collection of
+$D-1$ functions is a counterexample.
+
+\begin{remark}[The numerical threshold]
+For a base construction with $c$ colors and $k$ height coordinates,
+the transfer uses $6c$ markers and $c+k$ functionals, so its ambient
+dimension is $D=c+k+1$. The sufficient inequalities are
+\[
+ c\le7k-1,\qquad c\ge5k+5,\qquad c\ge2k+14.
+\]
+The first is the realization range; the last two express
+$6c>\max\{5D-1,4D+23\}$. For $k=2$ the first two conflict. For
+$k\ge3$, $D\ge6k+6\ge24$, with equality at $k=3,c=20$.
+Padding by five vertices propagates this base construction to every
+$D\ge24$. Neither this optimization nor the padding is a
+nonexistence argument below dimension $24$. The revision changes
+the class of measures and the uniformity, not the lowest dimension
+established by this argument.
+\end{remark}
+
+\section{Constructivity and the formal statements}\label{sec:formal}
+
+The scalar construction specifies its boundary table by rational data
+and a finite shell prescription. Before a rational piecewise-linear
+search, replace this boundary by a rational PL map: triangulate the
+radial shell prisms, with breaks at the three stages of
+\eqref{eq:anchor}, and interpolate their vertex values. On each
+small simplex both the original and interpolated images lie in one
+of the safe convex sets used in the safety proof: a bridge segment,
+or $\conv\{c_{J,A},H^0(e_i):i\in K\}$ with $|K|\le4$.
+Straight interpolation gives a safe homotopy fixed on common facet
+boundaries. Thus compatibility and all degrees are unchanged.
+
+A safe extension of this PL boundary can be found in principle by
+a fair enumeration of rational interior vertex data on successive
+barycentric subdivisions, with exact linear-feasibility tests against
+every $L_M$. Compactness supplies a positive avoidance margin for
+an existing continuous extension; sufficiently fine rational
+interpolation preserves it and occurs in the enumeration. This
+proves termination, but gives no practical complexity bound or
+expanded coefficient list.
+
+The same type of finite search applies to the vector table, without
+prescribing its boundary in advance. On successive rational
+subdivisions of the mass simplex enumerate rational vertex tables
+which ignore every inactive color. Affine interpolation then preserves
+compatibility. Every candidate has a finite exact safety test against
+all $L_M$. Uniform approximation of the compatible continuous table
+from Proposition~\ref{prop:vector} proves that this search terminates.
+
+The blocking points may also be specified by a terminating rational
+search. For rational input points, existence of a central cone
+partition with all points on its skeleton is a first-order statement
+over the real field: use unit pairwise separator normals and
+polynomial inequalities for fullness, coverage, and interior
+membership. Real quantifier elimination decides it. Lemma~\ref{lem:blockers}
+supplies an open set of blocking tuples, so enumeration of rational
+tuples eventually finds one.
+
+For a rational blocking tuple, one can likewise enumerate dyadic
+$\eta>0$ and test whether there is a partition into $r$ full-dimensional
+parts, for any $1\le r\le6$, having no interior marker and with every
+part meeting $\eta B_D$. Each such part is the intersection of $B_D$
+with at most $r-1$ affine halfspaces, so this is a finite first-order
+test over the real field. This test also covers the generalized tuples
+in Lemma~\ref{lem:nearcentral}: discard their empty-interior parts;
+the remaining parts still cover the ball and retain all the tested
+conditions. Conversely, a partition with fewer than six parts can be
+padded with copies of $\{0\}$. Thus quantifier elimination verifies
+the required exclusion without parametrizing arbitrary degenerate
+convex sets. The lemma guarantees termination. No Gaussian integral
+enters this test.
+A rational Gaussian scale can then be chosen below
+$\eta/\sqrt{6D}$. In dimension $D=24$, the interval endpoint
+$\sigma_0=\eta/12$ is rational when $\eta$ is rational. Every scale
+strictly below it has exterior mass less than $1/6$, so the inner
+ball carries more than $5/6$ of the full Gaussian probability.
+For Theorem~\ref{thm:concentrated}, the geometric data are fixed first and the
+measure is tested only afterwards by its concentration inequality.
+
+These are algorithms with existence-based termination proofs, not
+executed coefficient computations or practical complexity bounds.
+Once their outputs are fixed, \eqref{eq:functionals} is an exact formula
+for the body functionals. Proposition~\ref{prop:moments} gives a
+finite-moment alternative, but its coefficients have not been computed.
+The proof never asserts that limiting cones have equal solid angles;
+only common containment of zero and absence of interior markers are used.
+
+\begin{sloppypar}
+The accompanying Lean~4 formalization (pinned to \texttt{leanprover/lean4:v4.35.0}
+and Mathlib~\texttt{v4.35.0}, configured for Palomar via
+\texttt{Challenge.lean}, \texttt{Solution.lean}, \texttt{comparator.json},
+and \texttt{formalization.yaml}) builds cleanly with zero \texttt{sorry}
+in \texttt{Solution.lean} and all its dependencies.
+Theorem~\ref{thm:A} (\texttt{AkopyanSixfold.\allowbreak tverberg\_\allowbreak counterexample})
+is proved by executing the scalar height-table reduction, rational shell
+degree balance, and piecewise-linear zero-cancellation surgery in
+\texttt{RequestProject/}. Theorem~\ref{thm:B}
+(\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample})
+is proved in every dimension $d\ge24$ using standard Euclidean topologies, Mathlib's
+Hausdorff metric on \texttt{ConvexBody}, and a Borel probability measure
+(\texttt{IsProbabilityMeasure}), without restricting to absolutely
+continuous measures. Kernel axiom inspection confirms that
+both main theorems depend exclusively on \texttt{propext},
+\texttt{Quot.sound}, and \texttt{Classical.choice}.
+\end{sloppypar}
+
+\subsection*{Questions left open by these proofs}
+These arguments do not decide whether an almost six-embedding
+$\Delta^{30}\to\R^5$ exists, or whether fair-partition counterexamples
+exist in dimension $8$ or $7$. They give existence bounds, not
+nonexistence theorems in smaller dimensions.
+
+\begin{thebibliography}{12}
+\bibitem{AAK}
+A.~Akopyan, S.~Avvakumov, and R.~Karasev,
+\emph{Convex fair partitions into an arbitrary number of pieces},
+Adv. Math. \textbf{493} (2026), 110927.
+\href{https://doi.org/10.1016/j.aim.2026.110927}{doi:10.1016/j.aim.2026.110927};
+arXiv:1804.03057v14.
+
+\bibitem{AKS}
+S.~Avvakumov, R.~Karasev, and A.~Skopenkov,
+\emph{Stronger counterexamples to the topological Tverberg conjecture},
+Combinatorica \textbf{43} (2023), 717--727.
+\href{https://doi.org/10.1007/s00493-023-00031-w}{doi:10.1007/s00493-023-00031-w};
+arXiv:1908.08731v4.
+
+\bibitem{AMS}
+S.~Avvakumov, I.~Mabillard, A.~Skopenkov, and U.~Wagner,
+\emph{Eliminating higher-multiplicity intersections, III. Codimension 2},
+Israel J. Math. \textbf{245} (2021), 501--534.
+\href{https://doi.org/10.1007/s11856-021-2216-z}{doi:10.1007/s11856-021-2216-z}.
+
+\bibitem{BPR}
+S.~Basu, R.~Pollack, and M.-F.~Roy,
+\emph{Algorithms in Real Algebraic Geometry}, second edition,
+Algorithms and Computation in Mathematics \textbf{10}, Springer, 2006.
+\href{https://doi.org/10.1007/3-540-33099-2}{doi:10.1007/3-540-33099-2}.
+
+\bibitem{BFZ}
+P.~V.~M. Blagojevi\'c, F.~Frick, and G.~M. Ziegler,
+\emph{Tverberg plus constraints},
+Bull. Lond. Math. Soc. \textbf{46} (2014), 953--967.
+\href{https://doi.org/10.1112/blms/bdu049}{doi:10.1112/blms/bdu049}.
+
+\bibitem{Frick}
+F.~Frick,
+\emph{Counterexamples to the topological Tverberg conjecture},
+Oberwolfach Rep. \textbf{12} (2015), 318--321;
+\href{https://arxiv.org/abs/1502.00947}{arXiv:1502.00947}.
+
+\bibitem{Gromov}
+M.~Gromov,
+\emph{Singularities, expanders and topology of maps. Part 2:
+From combinatorics to topology via algebraic isoperimetry},
+Geom. Funct. Anal. \textbf{20} (2010), 416--526.
+\href{https://doi.org/10.1007/s00039-010-0073-8}{doi:10.1007/s00039-010-0073-8}.
+
+\bibitem{Hatcher}
+A.~Hatcher, \emph{Algebraic Topology}, Cambridge University Press, 2002.
+
+\bibitem{MW}
+I.~Mabillard and U.~Wagner,
+\emph{Eliminating higher-multiplicity intersections, I.
+A Whitney trick for Tverberg-type problems},
+\href{https://arxiv.org/abs/1508.02349}{arXiv:1508.02349} (2015).
+
+\bibitem{LZ}
+E.~Le\'on and G.~M.~Ziegler,
+\emph{Spaces of convex $n$-partitions}, arXiv:1511.02904 (2015).
+\end{thebibliography}
+\end{document}

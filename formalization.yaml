@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Sixfold Tverberg Counterexamples and Convex Equipartition Obstructions"
+  description: >-
+    We construct a counterexample to the generalized Nandakumar--Ramana Rao
+    problem: in every dimension d ≥ 24, there are d − 1 continuous functionals
+    on convex bodies and a probability measure such that there is no convex
+    partition of the unit ball into six parts of equal measure on which all
+    these functionals are equalized. We also show that the topological Tverberg
+    conjecture fails for sixfold intersections already in ℝ⁶: we construct a
+    continuous map Δ³⁵ → ℝ⁶ whose images of six pairwise disjoint faces never
+    meet.
+  authors:
+    - "Arseniy Akopyan"
+  license: "Apache-2.0"
+  responsible_maintainers:
+    - "Arseniy Akopyan"
+
+classification:
+  arxiv: ["math.CO", "math.MG", "math.AT"]
+  msc2020: ["52C35", "55M20", "52A20", "55S91"]
+
+sources:
+  - title: "Sixfold Tverberg counterexamples and convex equipartition obstructions"
+    authors:
+      - "Arseniy Akopyan"
+    type: "paper"
+    location: "paper/manuscript.tex, Theorems A and B"
+    relationship: "formalizes"
+    author_endorsement: "participated"
+    year: 2026
+
+status:
+  scope: >-
+    Complete, sorry-free Lean 4 formalization of the two main theorems of the
+    paper: the sixfold topological Tverberg counterexample Δ³⁵ → ℝ⁶ (Theorem A)
+    and the counterexample to the generalized Nandakumar--Ramana Rao convex
+    six-partition problem in dimensions d ≥ 24 (Theorem B). Verified with
+    comparator under standard Lean 4 axioms without custom axioms or sorry.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms:
+    - "propext"
+    - "Quot.sound"
+    - "Classical.choice"
+  main_results:
+    - declaration: "AkopyanSixfold.tverberg_counterexample"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms:
+        - "propext"
+        - "Quot.sound"
+        - "Classical.choice"
+      comparator_config: "comparator.json"
+    - declaration: "AkopyanSixfold.convex_partition_counterexample"
+      file: "Solution.lean"
+      sorry_count: 0
+      axioms:
+        - "propext"
+        - "Quot.sound"
+        - "Classical.choice"
+      comparator_config: "comparator.json"
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["Aristotle", "Gemini"]
+      framework: "AI-assisted Lean 4 formalization"
+      tool_setup: >-
+        Formalization and challenge development assisted by Aristotle and Gemini.
+
+review:
+  status: "self-assessed"
