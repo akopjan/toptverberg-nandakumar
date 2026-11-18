@@ -27,28 +27,28 @@ sources:
     authors:
       - "Arseniy Akopyan"
     type: "paper"
-    location: "paper/manuscript.tex, Theorems A, B, and 1.1"
+    location: "paper/manuscript.tex, Theorems A and B"
     relationship: "formalizes"
     author_endorsement: "participated"
     year: 2026
     note: >-
       Theorem A (AkopyanSixfold.tverberg_counterexample) is formalized
       unconditionally. Theorem B (AkopyanSixfold.convex_partition_counterexample)
-      formalizes the join-padding reduction (Lemma 3.3), the Hausdorff-continuous
-      inward-distance functional transfer (Lemma 5.3), the concentrated-measure
-      fairness lemma (Lemma 5.4), and both the uniform concentrated-measure
-      obstruction (Theorem 1.1) and a concrete absolutely continuous probability
-      measure obstruction (Theorem B), conditional on a blocking marker
-      hypothesis IsCentralBlocking p eta (Lemmas 5.1--5.2).
+      is formalized for absolutely continuous probability measures conditional on
+      a blocking marker hypothesis IsBlocking p eta (Lemmas 5.1--5.2), proving
+      the join-padding reduction (Lemma 3.3), Hausdorff-continuous inward-distance
+      transfer (Lemma 5.3), concentrated-measure fairness (Lemma 5.4), and a
+      normalized Lebesgue ball probability measure.
 
 status:
   scope: >-
     Sorry-free Lean 4 formalization of AkopyanSixfold.tverberg_counterexample
     (unconditional proof of Theorem A: an almost six-embedding Δ³⁵ → ℝ⁶) and
-    AkopyanSixfold.convex_partition_counterexample (conditional proof of the
-    inward-distance transfer and concentrated absolutely continuous measure
-    obstruction for d ≥ 24). Verified with comparator under the standard Lean 4
-    axioms [propext, Quot.sound, Classical.choice] without custom axioms or sorry.
+    AkopyanSixfold.convex_partition_counterexample (conditional on IsBlocking p eta,
+    proving the join-padding reduction, inward-distance transfer, and absolutely
+    continuous probability measure obstruction for d ≥ 24). Verified with
+    comparator under standard Lean 4 axioms [propext, Quot.sound, Classical.choice]
+    without custom axioms or sorry.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -84,17 +84,19 @@ fidelity:
     radius eta ∈ (0, 1). In Challenge.lean, neither Theorem C nor the
     semialgebraic blocking construction (Lemmas 5.1--5.2) is formalized; instead,
     AkopyanSixfold.convex_partition_counterexample takes a tuple p of 5d − 4
-    markers and radius eta satisfying IsCentralBlocking p eta as an explicit
-    hypothesis. Starting from Theorem A (36 vertices in ℝ⁶), Solution.lean
-    unconditionally formalizes join-padding d − 8 times to obtain an almost
-    six-embedding on 5d − 4 vertices into ℝ^(d−2) (Lemma 3.3), proves
-    Hausdorff continuity via Hahn--Banach separation and transfers it to d − 1
-    body functionals Φ chosen before any measure (Lemma 5.3), proves that any
-    fair partition under a concentrated absolutely continuous measure meets the
-    eta-ball (Lemma 5.4), and derives both the uniform obstruction for all
-    eta-concentrated measures mu ≪ volume and an explicit normalized Lebesgue
-    ball probability measure. Note that the semialgebraic dimension count of
-    Lemma 5.1 requires 5d markers rather than 5d − 4.
+    markers and radius eta satisfying IsBlocking p eta as an explicit
+    hypothesis, and states the existence of d − 1 continuous functionals Phi and
+    an absolutely continuous probability measure mu ≪ volume. Internally,
+    Solution.lean unconditionally formalizes join-padding d − 8 times from
+    Theorem A to obtain an almost six-embedding on 5d − 4 vertices into ℝ^(d−2)
+    (Lemma 3.3), proves Hausdorff continuity via Hahn--Banach separation and
+    constructs Phi before any measure (Lemma 5.3), proves the concentrated-measure
+    fairness lemma (Lemma 5.4) uniformly for all eta-concentrated measures, and
+    instantiates it with a normalized Lebesgue ball probability measure. Note
+    that the explicit uniform quantifier (∀ mu ...) is proved internally rather
+    than exposed as a separate conjunct in the simplified Challenge.lean target,
+    and that the semialgebraic dimension count of Lemma 5.1 requires 5d
+    markers rather than 5d − 4.
 
 automation:
   methods:
@@ -118,17 +120,15 @@ alignment:
       status: "proved (unconditional)"
       note: >-
         Unconditional proof of an almost six-embedding Δ³⁵ → ℝ⁶.
-    - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorems B and 1.1"
+    - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorem B"
       lean: "AkopyanSixfold.convex_partition_counterexample"
       module: "Challenge"
-      status: "proved (conditional on IsCentralBlocking p eta)"
+      status: "proved (conditional on IsBlocking p eta)"
       note: >-
-        Proves the join-padding reduction (Lemma 3.3), the 1-Lipschitz
-        Hausdorff-continuous inward-distance transfer (Lemma 5.3), the
-        concentrated-measure fairness lemma (Lemma 5.4), the uniform obstruction
-        for all eta-concentrated absolutely continuous measures (Theorem 1.1),
-        and existence of a concrete absolutely continuous probability measure
-        (Theorem B) in every dimension d ≥ 24, conditional on an explicit
-        eta-central blocking tuple of 5d − 4 markers. Does not formalize
-        Theorem C (Δ¹¹⁹ → ℝ²²) or the semialgebraic blocking construction
-        (Lemmas 5.1--5.2).
+        Formalizes Theorem B for an absolutely continuous probability measure in
+        every dimension d ≥ 24, conditional on an explicit blocking tuple of
+        5d − 4 markers (IsBlocking p eta). Solution.lean proves the join-padding
+        reduction (Lemma 3.3), 1-Lipschitz Hausdorff-continuous inward-distance
+        transfer (Lemma 5.3), concentrated-measure fairness lemma (Lemma 5.4),
+        and normalized Lebesgue ball measure witness, while omitting Theorem C
+        (Δ¹¹⁹ → ℝ²²) and the semialgebraic blocking construction (Lemmas 5.1--5.2).

@@ -77,15 +77,13 @@ def IsSixPartition {d : ℕ} (C : Fin 6 → Body d) : Prop :=
     Disjoint (interior (C i : Set (Ambient d)))
              (interior (C j : Set (Ambient d)))
 
-/-- A marker tuple `p : Fin m → Ambient d` and radius `eta ∈ (0, 1)` block
-`eta`-central convex six-partitions of the unit ball if every convex six-partition
-whose parts all meet the closed `eta`-ball contains at least one marker `p a`
-in the interior of some part `C i` (Lemmas 5.1–5.2 of the manuscript). -/
-def IsCentralBlocking {d m : ℕ} (p : Fin m → Ambient d) (eta : ℝ) : Prop :=
+/-- `p` and `eta ∈ (0, 1)` block central six-partitions if every six-partition
+whose parts all meet the `eta`-ball contains some marker `p a` in the interior
+of some part. -/
+def IsBlocking {d m : ℕ} (p : Fin m → Ambient d) (eta : ℝ) : Prop :=
   0 < eta ∧ eta < 1 ∧
-  ∀ C : Fin 6 → Body d,
-    IsSixPartition C →
-    (∀ i, ((C i : Set (Ambient d)) ∩ Metric.closedBall (0 : Ambient d) eta).Nonempty) →
+  ∀ C : Fin 6 → Body d, IsSixPartition C →
+    (∀ i, ∃ x ∈ (C i : Set (Ambient d)), ‖x‖ ≤ eta) →
     ∃ i a, p a ∈ interior (C i : Set (Ambient d))
 
 /-! ### Helper 1: Join-padding of almost six-embeddings (Lemma 3.3) -/
@@ -452,37 +450,20 @@ private lemma normalized_ball_measure_props {d : ℕ} {eta : ℝ}
   · rw [hmu_ball, hmu_S]
     norm_num
 
-/-- **Theorem B (Conditional on central blocking markers)**:
-For every dimension `d ≥ 24` and every `eta`-central blocking tuple `p` of
-`5 * d - 4` markers, there exist `d - 1` continuous functionals `Phi` on convex
-bodies (chosen before the measure) that cannot be equalized on any fair convex
-six-partition of the unit ball for any `eta`-concentrated absolutely continuous
-measure `mu`, and in particular for a concrete absolutely continuous probability
-measure on `Ambient d`. -/
-theorem convex_partition_counterexample :
-    ∀ d : ℕ, 24 ≤ d →
-    ∀ (p : Fin (5 * d - 4) → Ambient d) (eta : ℝ),
-      IsCentralBlocking p eta →
-      ∃ Phi : Body d → (Fin (d - 1) → ℝ),
-        Continuous Phi ∧
-        (∀ mu : Measure (Ambient d),
-          mu.AbsolutelyContinuous (volume : Measure (Ambient d)) →
-          0 < mu (unitBall d) →
-          mu (unitBall d) < ⊤ →
-          5 * mu (unitBall d) <
-            6 * mu (Metric.closedBall (0 : Ambient d) eta) →
-          ∀ C : Fin 6 → Body d,
-            IsSixPartition C →
-            (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
-            ∃ i, Phi (C i) ≠ Phi (C 0)) ∧
-        (∃ mu : Measure (Ambient d),
-          IsProbabilityMeasure mu ∧
-          mu.AbsolutelyContinuous (volume : Measure (Ambient d)) ∧
-          ∀ C : Fin 6 → Body d,
-            IsSixPartition C →
-            (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
-            ∃ i, Phi (C i) ≠ Phi (C 0)) := by
-  intro d hd p eta hp
+/-- **Theorem B**: In every dimension `d ≥ 24`, there exist `d - 1` continuous
+functionals on convex bodies and an absolutely continuous probability measure
+such that no convex six-partition of the unit ball into six parts of equal
+measure equalizes all these functionals. -/
+theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
+    (p : Fin (5 * d - 4) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) := by
   have hd_pos : 0 < d := by omega
   obtain ⟨g, hg⟩ := padded_almostSixEmbedding hd
   have hcompact : IsCompact (simplex (5 * d - 4)) := isCompact_stdSimplex ℝ (Fin (5 * d - 4))
@@ -580,7 +561,9 @@ theorem convex_partition_counterexample :
           Finset.sum_eq_zero_iff_of_nonneg (fun b _ => hw_nonneg (C i) b) |>.mp hsum0 a
             (Finset.mem_univ a)
         linarith
-      obtain ⟨i, a, ha⟩ := hp.2.2 C hC hmeet
+      obtain ⟨i, a, ha⟩ := hp.2.2 C hC fun i => by
+        obtain ⟨y, hyC, hyeta⟩ := hmeet i
+        exact ⟨y, hyC, by simpa [Metric.mem_closedBall, dist_zero_right] using hyeta⟩
       exact hno_int i a ha
     · have hsi_ne : ∀ i, s (C i) ≠ 0 := fun i => (hs_eq i).symm ▸ hs0
       let x : Fin 6 → Fin (5 * d - 4) → ℝ := fun i a => w (C i) a / s (C i)
@@ -632,8 +615,8 @@ theorem convex_partition_counterexample :
     exact hPhi_obstruct C hC (fair_meets_eta_ball hp.2.1 hpos htop hconc hC hfair)
   obtain ⟨hprob, hac, hpos, htop, hconc⟩ :=
     normalized_ball_measure_props (d := d) hp.1 hp.2.1
-  refine ⟨Phi, hPhi_cont, h_unif, ?_⟩
-  exact ⟨_, hprob, hac, fun C hC hfair => h_unif _ hac hpos htop hconc C hC hfair⟩
+  exact ⟨Phi, _, hPhi_cont, hprob, hac,
+    fun C hC hfair => h_unif _ hac hpos htop hconc C hC hfair⟩
 
 end AkopyanSixfold
 end
