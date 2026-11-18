@@ -15,19 +15,21 @@ Matches `Challenge.lean` via `comparator.json` without importing `Challenge.lean
   An almost six-embedding `Δ³⁵ → ℝ⁶`, proved via the height-table construction
   `Tverberg6R.tverbergCounterexample_of_heightExtension Tverberg6R.heightExtension`.
 * `AkopyanSixfold.convex_partition_counterexample` (Theorem B):
-  In every dimension `d ≥ 24`, given `g₀ : Δ¹¹⁹ → ℝ²²` (Theorem C) and `5 * d` blocking
-  markers `(p, eta)` for `eta`-central six-partitions, iterates join-padding (`d - 24` times)
-  to produce an almost six-embedding `g : Δ^(5d-1) → ℝ^(d-2)`, transfers it via the
-  Hausdorff-continuous inward-distance functional `inwardDist` to `d - 1` continuous body
-  functionals `Phi`, and proves that no fair convex six-partition equalizes `Phi` for any
-  `eta`-concentrated absolutely continuous measure (nor for a normalized Lebesgue ball witness).
+  In every dimension `d ≥ 24`, given `5 * d - 4` central blocking markers `p`
+  (`IsBlocking p`), proves the Blaschke selection theorem (`blaschke_isCompact_subsets_unitBall`)
+  and central-avoidance lemma (`exists_eta_of_isBlocking`, Lemma 5.2), iterates join-padding
+  (`d - 8` times) from Theorem A to produce an almost six-embedding `Δ^(5d-5) → ℝ^(d-2)`,
+  transfers it via the Hausdorff-continuous inward-distance functional `inwardDist` to
+  `d - 1` continuous body functionals `Phi`, and proves that no fair convex six-partition
+  equalizes `Phi` for any `eta`-concentrated absolutely continuous measure (nor for a
+  normalized Lebesgue ball witness).
 * Additional results in `Solution.lean`:
   `join_almostSixEmbedding`, `tverberg_counterexample_ge_six` (`d ≥ 6`), `fivefold_tverberg_join`
   (`Δ¹⁷⁹ → ℝ³⁴`), `padded_tverberg_ge_36` (`d ≥ 36`), `twofold_seven_color_join`
   (`Δ⁴¹ → ℝ⁷` implies `Δ⁸³ → ℝ¹⁵`), `convex_partition_of_embedding_and_blocking`,
-  `convex_partition_counterexample_ge_36` (`d ≥ 36`, without Theorem C), and
-  `convex_partition_counterexample_ge_18` (`d ≥ 18`, conditional on `Δ⁸⁹ → ℝ¹⁶`
-  and `5d` blocking markers).
+  `convex_partition_counterexample_ge_36` (`d ≥ 36`, `5 * d` central blocking markers without `[AKS]`),
+  and `convex_partition_counterexample_ge_18` (`d ≥ 18`, conditional on `Δ⁸⁹ → ℝ¹⁶` and
+  `5 * d` central blocking markers).
 -/
 
 set_option autoImplicit false
@@ -84,13 +86,16 @@ def IsSixPartition {d : ℕ} (C : Fin 6 → Body d) : Prop :=
     Disjoint (interior (C i : Set (Ambient d)))
              (interior (C j : Set (Ambient d)))
 
-/-- `p` and `eta ∈ (0, 1)` block central six-partitions if every six-partition
-whose parts all meet the `eta`-ball contains some marker `p a` in the interior
-of some part. -/
-def IsBlocking {d m : ℕ} (p : Fin m → Ambient d) (eta : ℝ) : Prop :=
-  0 < eta ∧ eta < 1 ∧
-  ∀ C : Fin 6 → Body d, IsSixPartition C →
-    (∀ i, ∃ x ∈ (C i : Set (Ambient d)), ‖x‖ ≤ eta) →
+/-- `p` blocks central six-partitions if every six-partition of `unitBall d`
+(possibly with degenerate parts) whose parts all contain the origin `0` has some
+marker `p a` in the interior of some part. -/
+def IsBlocking {d m : ℕ} (p : Fin m → Ambient d) : Prop :=
+  ∀ C : Fin 6 → Body d,
+    unitBall d = (⋃ i, (C i : Set (Ambient d))) →
+    (∀ i j, i ≠ j →
+      Disjoint (interior (C i : Set (Ambient d)))
+               (interior (C j : Set (Ambient d)))) →
+    (∀ i, (0 : Ambient d) ∈ (C i : Set (Ambient d))) →
     ∃ i a, p a ∈ interior (C i : Set (Ambient d))
 
 /-! ### Helper 1: Perspective continuity, binary joins, and join-padding -/
@@ -473,6 +478,255 @@ private lemma continuous_inwardDist {d : ℕ} (hd : 0 < d) (p : Ambient d) :
     rw [dist_comm]
     exact inwardDist_le hd p D C).continuous
 
+/-! ### Helper 2.5: Blaschke selection theorem and central-avoidance margin (Lemma 5.2) -/
+
+private def bodyToNC {d : ℕ} (C : Body d) : TopologicalSpace.NonemptyCompacts (Ambient d) :=
+  ⟨⟨(C : Set (Ambient d)), C.isCompact⟩, C.nonempty⟩
+
+private lemma isometry_bodyToNC {d : ℕ} : Isometry (bodyToNC (d := d)) :=
+  Isometry.of_dist_eq fun C D => by
+    change Metric.hausdorffDist (C : Set (Ambient d)) D = dist C D
+    exact ConvexBody.hausdorffDist_coe C D
+
+private lemma continuous_infDist_body {d : ℕ} (x : Ambient d) :
+    Continuous (fun C : Body d => Metric.infDist x (C : Set (Ambient d))) :=
+  (LipschitzWith.of_le_add fun C D => by
+    have h := Metric.infDist_le_infDist_add_hausdorffDist (x := x)
+      (s := (D : Set (Ambient d))) (t := (C : Set (Ambient d))) ConvexBody.hausdorffEDist_ne_top
+    rw [ConvexBody.hausdorffDist_coe, dist_comm D C] at h
+    exact h).continuous
+
+private lemma convex_iff_infDist_ineq {d : ℕ}
+    (K : TopologicalSpace.NonemptyCompacts (Ambient d)) :
+    Convex ℝ (K : Set (Ambient d)) ↔
+      ∀ (x y : Ambient d) (a b : ℝ),
+        0 ≤ a → 0 ≤ b → a + b = 1 →
+        Metric.infDist (a • x + b • y) (K : Set (Ambient d)) ≤
+          a * Metric.infDist x (K : Set (Ambient d)) +
+          b * Metric.infDist y (K : Set (Ambient d)) := by
+  constructor
+  · intro hK x y a b ha hb hab
+    obtain ⟨u, hu, hux⟩ := K.isCompact.exists_infDist_eq_dist K.nonempty x
+    obtain ⟨v, hv, hvy⟩ := K.isCompact.exists_infDist_eq_dist K.nonempty y
+    have hmem : a • u + b • v ∈ (K : Set (Ambient d)) :=
+      convex_iff_add_mem.mp hK hu hv ha hb hab
+    have hdiff : (a • x + b • y) - (a • u + b • v) = a • (x - u) + b • (y - v) := by
+      simp only [smul_sub]
+      abel
+    calc
+      Metric.infDist (a • x + b • y) (K : Set (Ambient d))
+        ≤ dist (a • x + b • y) (a • u + b • v) := Metric.infDist_le_dist_of_mem hmem
+      _ = ‖a • (x - u) + b • (y - v)‖ := by rw [dist_eq_norm, hdiff]
+      _ ≤ ‖a • (x - u)‖ + ‖b • (y - v)‖ := norm_add_le _ _
+      _ = a * ‖x - u‖ + b * ‖y - v‖ := by
+        rw [norm_smul, norm_smul, Real.norm_of_nonneg ha, Real.norm_of_nonneg hb]
+      _ = a * Metric.infDist x (K : Set (Ambient d)) + b * Metric.infDist y (K : Set (Ambient d)) := by
+        rw [← dist_eq_norm, ← dist_eq_norm, ← hux, ← hvy]
+  · intro hineq
+    refine convex_iff_add_mem.mpr fun x hx y hy a b ha hb hab => ?_
+    have hx0 : Metric.infDist x (K : Set (Ambient d)) = 0 := Metric.infDist_zero_of_mem hx
+    have hy0 : Metric.infDist y (K : Set (Ambient d)) = 0 := Metric.infDist_zero_of_mem hy
+    have hle : Metric.infDist (a • x + b • y) (K : Set (Ambient d)) ≤ 0 := by
+      have h := hineq x y a b ha hb hab
+      rw [hx0, hy0, mul_zero, mul_zero, add_zero] at h
+      exact h
+    have hzero : Metric.infDist (a • x + b • y) (K : Set (Ambient d)) = 0 :=
+      le_antisymm hle Metric.infDist_nonneg
+    exact (K.isCompact.isClosed.mem_iff_infDist_zero K.nonempty).2 hzero
+
+private lemma isClosed_range_bodyToNC {d : ℕ} :
+    IsClosed (Set.range (bodyToNC (d := d))) := by
+  let S : Set (TopologicalSpace.NonemptyCompacts (Ambient d)) :=
+    ⋂ (x : Ambient d) (y : Ambient d)
+      (c : {p : ℝ × ℝ // 0 ≤ p.1 ∧ 0 ≤ p.2 ∧ p.1 + p.2 = 1}),
+      {K | Metric.infDist (c.1.1 • x + c.1.2 • y) (K : Set (Ambient d)) ≤
+        c.1.1 * Metric.infDist x (K : Set (Ambient d)) +
+        c.1.2 * Metric.infDist y (K : Set (Ambient d))}
+  have hS_closed : IsClosed S := by
+    refine isClosed_iInter fun x => isClosed_iInter fun y => isClosed_iInter fun c => ?_
+    refine isClosed_le
+      (TopologicalSpace.NonemptyCompacts.lipschitz_infDist_const (c.1.1 • x + c.1.2 • y)).continuous
+      (((continuous_const.mul
+          (TopologicalSpace.NonemptyCompacts.lipschitz_infDist_const x).continuous)).add
+        (continuous_const.mul
+          (TopologicalSpace.NonemptyCompacts.lipschitz_infDist_const y).continuous))
+  have h_eq : Set.range (bodyToNC (d := d)) = S := by
+    ext K
+    constructor
+    · rintro ⟨C, rfl⟩
+      simp only [S, Set.mem_iInter, Set.mem_ofPred_eq]
+      intro x y c
+      exact (convex_iff_infDist_ineq (bodyToNC C)).mp C.convex x y c.1.1 c.1.2 c.2.1 c.2.2.1 c.2.2.2
+    · intro hK
+      have hconv : Convex ℝ (K : Set (Ambient d)) := by
+        refine (convex_iff_infDist_ineq K).mpr fun x y a b ha hb hab => ?_
+        simp only [S, Set.mem_iInter, Set.mem_ofPred_eq] at hK
+        exact hK x y ⟨(a, b), ha, hb, hab⟩
+      refine ⟨⟨(K : Set (Ambient d)), hconv, K.isCompact, K.nonempty⟩, ?_⟩
+      ext
+      rfl
+  rw [h_eq]
+  exact hS_closed
+
+private lemma isClosedEmbedding_bodyToNC {d : ℕ} :
+    Topology.IsClosedEmbedding (bodyToNC (d := d)) where
+  __ := isometry_bodyToNC.isEmbedding
+  isClosed_range := isClosed_range_bodyToNC
+
+/-- **Blaschke Selection Theorem**: compact convex bodies contained in the closed unit ball
+form a compact subset of `ConvexBody (Ambient d)` with the Hausdorff metric. -/
+theorem blaschke_isCompact_subsets_unitBall (d : ℕ) :
+    IsCompact {C : Body d | (C : Set (Ambient d)) ⊆ unitBall d} := by
+  have hK :
+      IsCompact {K : TopologicalSpace.NonemptyCompacts (Ambient d) | (K : Set (Ambient d)) ⊆ unitBall d} :=
+    TopologicalSpace.NonemptyCompacts.isCompact_subsets_of_isCompact
+      (isCompact_closedBall (0 : Ambient d) 1)
+  have hpre :
+      {C : Body d | (C : Set (Ambient d)) ⊆ unitBall d} =
+        bodyToNC ⁻¹' {K : TopologicalSpace.NonemptyCompacts (Ambient d) | (K : Set (Ambient d)) ⊆ unitBall d} := by
+    ext C
+    rfl
+  rw [hpre]
+  exact isClosedEmbedding_bodyToNC.isCompact_preimage hK
+
+/-- **Central-avoidance margin (Lemma 5.2)**: if `p` blocks all central six-partitions of
+`unitBall d`, there exists `eta ∈ (0, 1)` such that every six-partition whose parts all meet
+`eta • unitBall d` contains some marker `p a` in the interior of some part. -/
+theorem exists_eta_of_isBlocking {d m : ℕ} (hd : 0 < d)
+    {p : Fin m → Ambient d} (hp : IsBlocking p) :
+    ∃ eta : ℝ,
+      0 < eta ∧ eta < 1 ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, ∃ x ∈ (C i : Set (Ambient d)), ‖x‖ ≤ eta) →
+        ∃ i a, p a ∈ interior (C i : Set (Ambient d)) := by
+  let Q : Set (Fin 6 → Body d) :=
+    Set.pi Set.univ fun _ : Fin 6 => {C : Body d | (C : Set (Ambient d)) ⊆ unitBall d}
+  have hQ_compact : IsCompact Q :=
+    isCompact_univ_pi fun _ => blaschke_isCompact_subsets_unitBall d
+  let Cov : Set (Fin 6 → Body d) :=
+    ⋂ x ∈ unitBall d,
+      {C : Fin 6 → Body d | (∏ i : Fin 6, Metric.infDist x (C i : Set (Ambient d))) = 0}
+  let Disj : Set (Fin 6 → Body d) :=
+    ⋂ (i : Fin 6) (j : Fin 6) (_ : i ≠ j) (x : Ambient d),
+      {C : Fin 6 → Body d | inwardDist x (C i) * inwardDist x (C j) = 0}
+  let NoMark : Set (Fin 6 → Body d) :=
+    ⋂ (i : Fin 6) (a : Fin m),
+      {C : Fin 6 → Body d | inwardDist (p a) (C i) = 0}
+  have hCov_closed : IsClosed Cov := by
+    refine isClosed_biInter fun x _ => isClosed_eq ?_ continuous_const
+    exact continuous_finsetProd Finset.univ fun i _ =>
+      (continuous_infDist_body x).comp (continuous_apply i)
+  have hDisj_closed : IsClosed Disj := by
+    refine isClosed_iInter fun i => isClosed_iInter fun j => isClosed_iInter fun _ =>
+      isClosed_iInter fun x => isClosed_eq ?_ continuous_const
+    exact ((continuous_inwardDist hd x).comp (continuous_apply i)).mul
+      ((continuous_inwardDist hd x).comp (continuous_apply j))
+  have hNoMark_closed : IsClosed NoMark := by
+    refine isClosed_iInter fun i => isClosed_iInter fun a => isClosed_eq ?_ continuous_const
+    exact (continuous_inwardDist hd (p a)).comp (continuous_apply i)
+  let S_bad : Set (Fin 6 → Body d) := Q ∩ (Cov ∩ Disj ∩ NoMark)
+  have hS_compact : IsCompact S_bad :=
+    hQ_compact.inter_right ((hCov_closed.inter hDisj_closed).inter hNoMark_closed)
+  have hCov_iff : ∀ C : Fin 6 → Body d,
+      C ∈ Cov ↔ unitBall d ⊆ (⋃ i, (C i : Set (Ambient d))) := fun C => by
+    simp only [Cov, Set.mem_iInter, Set.mem_ofPred_eq, Finset.prod_eq_zero_iff,
+      Finset.mem_univ, true_and]
+    refine ⟨fun h x hx => ?_, fun h x hx => ?_⟩
+    · obtain ⟨i, hi⟩ := h x hx
+      exact Set.mem_iUnion.mpr ⟨i, ((C i).isClosed.mem_iff_infDist_zero (C i).nonempty).2 hi⟩
+    · obtain ⟨i, hi⟩ := Set.mem_iUnion.mp (h hx)
+      exact ⟨i, Metric.infDist_zero_of_mem hi⟩
+  have hDisj_iff : ∀ C : Fin 6 → Body d,
+      C ∈ Disj ↔
+        ∀ i j, i ≠ j →
+          Disjoint (interior (C i : Set (Ambient d)))
+                   (interior (C j : Set (Ambient d))) := fun C => by
+    simp only [Disj, Set.mem_iInter, Set.mem_ofPred_eq]
+    refine ⟨fun h i j hij => Set.disjoint_left.mpr fun x hxi hxj => ?_, fun h i j hij x => ?_⟩
+    · have hi_pos : 0 < inwardDist x (C i) := (inwardDist_pos_iff hd x (C i)).mpr hxi
+      have hj_pos : 0 < inwardDist x (C j) := (inwardDist_pos_iff hd x (C j)).mpr hxj
+      have h0 : inwardDist x (C i) * inwardDist x (C j) = 0 := h i j hij x
+      linarith [mul_pos hi_pos hj_pos]
+    · by_cases hxi : x ∈ interior (C i : Set (Ambient d))
+      · have hxj : x ∉ interior (C j : Set (Ambient d)) := Set.disjoint_left.mp (h i j hij) hxi
+        have hwj : inwardDist x (C j) = 0 := by
+          have hnot := (inwardDist_pos_iff hd x (C j)).not.mpr hxj
+          exact le_antisymm (not_lt.mp hnot) Metric.infDist_nonneg
+        simp [hwj]
+      · have hwi : inwardDist x (C i) = 0 := by
+          have hnot := (inwardDist_pos_iff hd x (C i)).not.mpr hxi
+          exact le_antisymm (not_lt.mp hnot) Metric.infDist_nonneg
+        simp [hwi]
+  have hNoMark_iff : ∀ C : Fin 6 → Body d,
+      C ∈ NoMark ↔ ∀ i a, p a ∉ interior (C i : Set (Ambient d)) := fun C => by
+    simp only [NoMark, Set.mem_iInter, Set.mem_ofPred_eq]
+    refine ⟨fun h i a ha => ?_, fun h i a => ?_⟩
+    · have hpos : 0 < inwardDist (p a) (C i) := (inwardDist_pos_iff hd (p a) (C i)).mpr ha
+      linarith [h i a]
+    · have hnot := (inwardDist_pos_iff hd (p a) (C i)).not.mpr (h i a)
+      exact le_antisymm (not_lt.mp hnot) Metric.infDist_nonneg
+  let F : (Fin 6 → Body d) → ℝ := fun C =>
+    ∑ i : Fin 6, Metric.infDist (0 : Ambient d) (C i : Set (Ambient d))
+  have hF_cont : Continuous F :=
+    continuous_finsetSum Finset.univ fun i _ =>
+      (continuous_infDist_body (0 : Ambient d)).comp (continuous_apply i)
+  have h_not_mem_Sbad : ∀ C : Fin 6 → Body d, IsSixPartition C →
+      (∃ i a, p a ∈ interior (C i : Set (Ambient d))) ∨ C ∈ S_bad := by
+    intro C hC
+    by_cases hm : ∃ i a, p a ∈ interior (C i : Set (Ambient d))
+    · exact Or.inl hm
+    · right
+      push Not at hm
+      refine ⟨fun i _ => ?_, ⟨(hCov_iff C).mpr (by rw [hC.1]), (hDisj_iff C).mpr hC.2.2⟩,
+        (hNoMark_iff C).mpr hm⟩
+      rw [hC.1]
+      exact Set.subset_iUnion (fun j => (C j : Set (Ambient d))) i
+  by_cases hS_ne : S_bad.Nonempty
+  · obtain ⟨C₀, hC₀_mem, hC₀_min⟩ := hS_compact.exists_isMinOn hS_ne hF_cont.continuousOn
+    have hF_pos : 0 < F C₀ := by
+      by_contra hle
+      have hnonpos : F C₀ ≤ 0 := not_lt.mp hle
+      have hzero : F C₀ = 0 :=
+        le_antisymm hnonpos (Finset.sum_nonneg fun i _ => Metric.infDist_nonneg)
+      have hzero_mem : ∀ i : Fin 6, (0 : Ambient d) ∈ (C₀ i : Set (Ambient d)) := fun i => by
+        have hi0 : Metric.infDist (0 : Ambient d) (C₀ i : Set (Ambient d)) = 0 :=
+          Finset.sum_eq_zero_iff_of_nonneg (fun j _ => Metric.infDist_nonneg) |>.mp hzero i
+            (Finset.mem_univ i)
+        exact ((C₀ i).isClosed.mem_iff_infDist_zero (C₀ i).nonempty).2 hi0
+      rcases hC₀_mem with ⟨hQ₀, ⟨hCov₀, hDisj₀⟩, hNoMark₀⟩
+      have h_eq : unitBall d = (⋃ i, (C₀ i : Set (Ambient d))) :=
+        subset_antisymm ((hCov_iff C₀).mp hCov₀) (Set.iUnion_subset fun i => hQ₀ i (Set.mem_univ i))
+      obtain ⟨i, a, ha⟩ := hp C₀ h_eq ((hDisj_iff C₀).mp hDisj₀) hzero_mem
+      exact (hNoMark_iff C₀).mp hNoMark₀ i a ha
+    let eta : ℝ := min (1 / 2) (F C₀ / 12)
+    have heta0 : 0 < eta := lt_min (by norm_num) (by linarith)
+    have heta1 : eta < 1 := lt_of_le_of_lt (min_le_left _ _) (by norm_num)
+    refine ⟨eta, heta0, heta1, fun C hC hmeet => ?_⟩
+    rcases h_not_mem_Sbad C hC with hm | hC_bad
+    · exact hm
+    · exfalso
+      have hmin : F C₀ ≤ F C := hC₀_min hC_bad
+      have hFC_le : F C ≤ 6 * eta := by
+        have hterm : ∀ i : Fin 6, Metric.infDist (0 : Ambient d) (C i : Set (Ambient d)) ≤ eta := by
+          intro i
+          obtain ⟨x, hxC, hxnorm⟩ := hmeet i
+          calc
+            Metric.infDist (0 : Ambient d) (C i : Set (Ambient d)) ≤ dist (0 : Ambient d) x :=
+              Metric.infDist_le_dist_of_mem hxC
+            _ = ‖x‖ := by rw [dist_zero_left]
+            _ ≤ eta := hxnorm
+        calc
+          F C = ∑ i : Fin 6, Metric.infDist (0 : Ambient d) (C i : Set (Ambient d)) := rfl
+          _ ≤ ∑ _i : Fin 6, eta := Finset.sum_le_sum fun i _ => hterm i
+          _ = 6 * eta := by simp [nsmul_eq_mul]
+      have heta_bound : eta ≤ F C₀ / 12 := min_le_right _ _
+      linarith
+  · refine ⟨1 / 2, by norm_num, by norm_num, fun C hC _ => ?_⟩
+    rcases h_not_mem_Sbad C hC with hm | hC_bad
+    · exact hm
+    · exact False.elim (hS_ne ⟨C, hC_bad⟩)
+
 /-! ### Helper 3: Fair partitions under concentrated measures & Lebesgue restriction -/
 
 private lemma fair_meets_eta_ball {d : ℕ} {eta : ℝ} (heta : eta < 1)
@@ -559,13 +813,14 @@ private lemma normalized_ball_measure_props {d : ℕ} {eta : ℝ}
     norm_num
 
 /-- **General convex equipartition transfer**: given any almost six-embedding
-`g : Δ^(m-1) → ℝ^(d-2)` and `m` blocking markers `(p, eta)` in dimension `d ≥ 2`,
-constructs `d - 1` continuous functionals `Phi` and an absolutely continuous
-probability measure `mu` (and in fact works uniformly for every `eta`-concentrated
-absolutely continuous measure) such that no fair convex six-partition equalizes `Phi`. -/
+`g : Δ^(m-1) → ℝ^(d-2)` and `m` central blocking markers `p` (`IsBlocking p`) in dimension `d ≥ 2`,
+uses `exists_eta_of_isBlocking` (Lemma 5.2 / Blaschke compactness) to obtain `eta ∈ (0, 1)`,
+constructs `d - 1` continuous functionals `Phi` and an absolutely continuous probability
+measure `mu` (working uniformly for every `eta`-concentrated absolutely continuous measure)
+such that no fair convex six-partition equalizes `Phi`. -/
 theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
     {g : (Fin m → ℝ) → (Fin (d - 2) → ℝ)} (hg : IsAlmostSixEmbedding g)
-    {p : Fin m → Ambient d} {eta : ℝ} (hp : IsBlocking p eta) :
+    {p : Fin m → Ambient d} (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧
@@ -575,6 +830,7 @@ theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
         (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
         ∃ i, Phi (C i) ≠ Phi (C 0) := by
   have hd_pos : 0 < d := by omega
+  obtain ⟨eta, heta0, heta1, heta_block⟩ := exists_eta_of_isBlocking hd_pos hp
   let w : Body d → Fin m → ℝ := fun C a => inwardDist (p a) C
   let s : Body d → ℝ := fun C => ∑ a, w C a
   let Phi : Body d → (Fin (d - 1) → ℝ) := fun C k =>
@@ -623,7 +879,7 @@ theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
           Finset.sum_eq_zero_iff_of_nonneg (fun b _ => hw_nonneg (C i) b) |>.mp hsum0 a
             (Finset.mem_univ a)
         linarith
-      obtain ⟨i, a, ha⟩ := hp.2.2 C hC fun i => by
+      obtain ⟨i, a, ha⟩ := heta_block C hC fun i => by
         obtain ⟨y, hyC, hyeta⟩ := hmeet i
         exact ⟨y, hyC, by simpa [Metric.mem_closedBall, dist_zero_right] using hyeta⟩
       exact hno_int i a ha
@@ -674,15 +930,15 @@ theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
           (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
           ∃ i, Phi (C i) ≠ Phi (C 0) := by
     intro mu _ hpos htop hconc C hC hfair
-    exact hPhi_obstruct C hC (fair_meets_eta_ball hp.2.1 hpos htop hconc hC hfair)
+    exact hPhi_obstruct C hC (fair_meets_eta_ball heta1 hpos htop hconc hC hfair)
   obtain ⟨hprob, hac, hpos, htop, hconc⟩ :=
-    normalized_ball_measure_props (d := d) hp.1 hp.2.1
+    normalized_ball_measure_props (d := d) heta0 heta1
   exact ⟨Phi, _, hPhi_cont, hprob, hac,
     fun C hC hfair => h_unif _ hac hpos htop hconc C hC hfair⟩
 
 private theorem convex_partition_from_base {d₀ d : ℕ} (hd₀ : 2 ≤ d₀) (hd : d₀ ≤ d)
     {g₀ : (Fin (5 * d₀) → ℝ) → (Fin (d₀ - 2) → ℝ)} (hg₀ : IsAlmostSixEmbedding g₀)
-    {p : Fin (5 * d) → Ambient d} {eta : ℝ} (hp : IsBlocking p eta) :
+    {p : Fin (5 * d) → Ambient d} (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧
@@ -696,14 +952,12 @@ private theorem convex_partition_from_base {d₀ d : ℕ} (hd₀ : 2 ≤ d₀) (
     (by omega : (d₀ - 2) + (d - d₀) = d - 2) hg₁
   exact convex_partition_of_embedding_and_blocking (by omega) hg hp
 
-/-- **Theorem B**: In every dimension `d ≥ 24`, given an almost six-embedding
-`g₀ : Δ¹¹⁹ → ℝ²²` (Theorem C of the paper) and `5 * d` blocking markers `(p, eta)`,
-there exist `d - 1` continuous functionals on convex bodies and an absolutely continuous
-probability measure such that no convex six-partition of the unit ball into six parts
-of equal measure equalizes all these functionals. -/
+/-- **Theorem B**: In every dimension `d ≥ 24`, given `5 * d - 4` central blocking markers `p`,
+derives `eta` via Blaschke compactness (`exists_eta_of_isBlocking`), pads Theorem A `d - 8` times
+to `Δ^(5d-5) → ℝ^(d-2)`, and constructs `d - 1` continuous functionals on convex bodies and an
+absolutely continuous probability measure without equalizing convex six-partitions. -/
 theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
-    (g₀ : (Fin 120 → ℝ) → (Fin 22 → ℝ)) (hg₀ : IsAlmostSixEmbedding g₀)
-    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    (p : Fin (5 * d - 4) → Ambient d) (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧
@@ -711,16 +965,20 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
       ∀ C : Fin 6 → Body d,
         IsSixPartition C →
         (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
-        ∃ i, Phi (C i) ≠ Phi (C 0) :=
-  convex_partition_from_base (by norm_num : 2 ≤ 24) hd hg₀ hp
+        ∃ i, Phi (C i) ≠ Phi (C 0) := by
+  obtain ⟨g₀, hg₀⟩ := tverberg_counterexample
+  obtain ⟨g₁, hg₁⟩ := iterated_padding_from (d - 8) hg₀
+  obtain ⟨g, hg⟩ := reindex_almostSixEmbedding (by omega : 36 + 5 * (d - 8) = 5 * d - 4)
+    (by omega : 6 + (d - 8) = d - 2) hg₁
+  exact convex_partition_of_embedding_and_blocking (by omega) hg hp
 
 /-- **Conditional `d ≥ 18` reduction (Section 3.1–3.3 of the research report)**: in every
-dimension `d ≥ 18`, given an almost six-embedding `g₀ : Δ⁸⁹ → ℝ¹⁶` and `5 * d` blocking
-markers `(p, eta)`, join-padding `d - 18` times and inward-distance transfer yield the
-same obstruction. -/
+dimension `d ≥ 18`, given an almost six-embedding `g₀ : Δ⁸⁹ → ℝ¹⁶` and `5 * d` central
+blocking markers `p`, Blaschke compactness, join-padding `d - 18` times, and inward-distance
+transfer yield the same obstruction. -/
 theorem convex_partition_counterexample_ge_18 (d : ℕ) (hd : 18 ≤ d)
     (g₀ : (Fin 90 → ℝ) → (Fin 16 → ℝ)) (hg₀ : IsAlmostSixEmbedding g₀)
-    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    (p : Fin (5 * d) → Ambient d) (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧
@@ -733,9 +991,9 @@ theorem convex_partition_counterexample_ge_18 (d : ℕ) (hd : 18 ≤ d)
 
 /-- **`[AKS]`-free Convex Equipartition Transfer (`d ≥ 36`)**: In every dimension `d ≥ 36`,
 using the unconditional fivefold join of Theorem A (`fivefold_tverberg_join`), `5 * d`
-blocking markers suffice without any external almost-six-embedding assumption. -/
+central blocking markers suffice without any external almost-six-embedding assumption. -/
 theorem convex_partition_counterexample_ge_36 (d : ℕ) (hd : 36 ≤ d)
-    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    (p : Fin (5 * d) → Ambient d) (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧

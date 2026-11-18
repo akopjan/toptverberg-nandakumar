@@ -38,12 +38,14 @@ sources:
       (fivefold_tverberg_join, padded_tverberg_ge_36) in Solution.lean. Theorem B
       (AkopyanSixfold.convex_partition_counterexample) is formalized for
       absolutely continuous probability measures in every dimension d ≥ 24
-      conditional on Theorem C (g₀ : Δ¹¹⁹ → ℝ²²) and 5d blocking markers
-      satisfying IsBlocking p eta (Lemmas 5.1--5.2), proving join-padding
-      (Lemma 3.3 / Corollary 3.4), Hausdorff-continuous inward-distance transfer
-      (Lemma 5.3), concentrated-measure fairness (Lemma 5.4), and a normalized
-      Lebesgue ball witness; for d ≥ 36, convex_partition_counterexample_ge_36
-      eliminates the Theorem C hypothesis via the fivefold join of Theorem A.
+      conditional only on a central blocking configuration IsBlocking p
+      (Lemma 5.1), proving the Blaschke selection theorem
+      (blaschke_isCompact_subsets_unitBall), the central-avoidance margin
+      (exists_eta_of_isBlocking, Lemma 5.2), join-padding from Theorem A
+      (Lemma 3.3), Hausdorff-continuous inward-distance transfer (Lemma 5.3),
+      concentrated-measure fairness (Lemma 5.4), and a normalized Lebesgue ball
+      witness; for d ≥ 36, convex_partition_counterexample_ge_36 handles 5d
+      central blocking markers without [AKS].
 
 status:
   scope: >-
@@ -52,13 +54,14 @@ status:
     tverberg_counterexample_ge_six (Δ^(5d+5) → ℝ^d for d ≥ 6),
     fivefold_tverberg_join (Δ¹⁷⁹ → ℝ³⁴), padded_tverberg_ge_36 (Δ^(5d-1) → ℝ^(d-2)
     for d ≥ 36), twofold_seven_color_join (Δ⁴¹ → ℝ⁷ implies Δ⁸³ → ℝ¹⁵),
-    AkopyanSixfold.convex_partition_counterexample (conditional on Theorem C and
-    IsBlocking p eta for 5d markers when d ≥ 24),
-    convex_partition_counterexample_ge_18 (conditional on Δ⁸⁹ → ℝ¹⁶ and
-    IsBlocking p eta for 5d markers when d ≥ 18), and
-    convex_partition_counterexample_ge_36 (conditional only on IsBlocking p eta
-    when d ≥ 36). Verified with comparator under standard Lean 4 axioms
-    [propext, Quot.sound, Classical.choice] without custom axioms or sorry.
+    blaschke_isCompact_subsets_unitBall (Blaschke selection theorem),
+    exists_eta_of_isBlocking (Lemma 5.2),
+    AkopyanSixfold.convex_partition_counterexample (conditional only on
+    IsBlocking p when d ≥ 24), convex_partition_counterexample_ge_18
+    (conditional on Δ⁸⁹ → ℝ¹⁶ and IsBlocking p when d ≥ 18), and
+    convex_partition_counterexample_ge_36 (conditional only on IsBlocking p for
+    5d markers when d ≥ 36). Verified with comparator under standard Lean 4
+    axioms [propext, Quot.sound, Classical.choice] without custom axioms or sorry.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -92,23 +95,27 @@ fidelity:
     semialgebraic parameter dimension of central six-cone skeleta, and
     Lemmas 5.1--5.2 construct 5d rational blocking markers and a central-avoidance
     radius eta ∈ (0, 1). In Challenge.lean, neither Theorem C nor the
-    semialgebraic blocking construction (Lemmas 5.1--5.2) is formalized; instead,
-    AkopyanSixfold.convex_partition_counterexample takes an almost six-embedding
-    g₀ : Δ¹¹⁹ → ℝ²² (Theorem C) and a tuple p of 5d markers and radius eta
-    satisfying IsBlocking p eta as explicit hypotheses, and states the existence
-    of d − 1 continuous functionals Phi and an absolutely continuous probability
-    measure mu ≪ volume. Internally, Solution.lean proves the binary join lemma
+    semialgebraic blocking construction (Theorem 4.1 / Lemma 5.1) is formalized;
+    instead, AkopyanSixfold.convex_partition_counterexample takes a central
+    blocking tuple p of 5d − 4 markers satisfying IsBlocking p (with neither
+    g₀ nor eta in the hypothesis) and states the existence of d − 1 continuous
+    functionals Phi and an absolutely continuous probability measure mu ≪ volume.
+    Internally, Solution.lean proves the Blaschke selection theorem
+    (blaschke_isCompact_subsets_unitBall via Mathlib's NonemptyCompacts),
+    deduces Lemma 5.2 (exists_eta_of_isBlocking), proves the binary join lemma
     join_almostSixEmbedding, the unconditional d ≥ 6 Tverberg extension
     tverberg_counterexample_ge_six, the unconditional fivefold join
     fivefold_tverberg_join : Δ¹⁷⁹ → ℝ³⁴ and padded_tverberg_ge_36 (for d ≥ 36),
-    twofold_seven_color_join (Δ⁴¹ → ℝ⁷ implies Δ⁸³ → ℝ¹⁵), join-padding d − 24
-    times from g₀ to Δ^(5d−1) → ℝ^(d−2) (Corollary 3.4), Hausdorff continuity
+    twofold_seven_color_join (Δ⁴¹ → ℝ⁷ implies Δ⁸³ → ℝ¹⁵), join-padding d − 8
+    times from Theorem A to Δ^(5d−5) → ℝ^(d−2) (Lemma 3.3), Hausdorff continuity
     via Hahn--Banach separation and inward-distance transfer (Lemma 5.3), the
     concentrated-measure fairness lemma (Lemma 5.4), a normalized Lebesgue ball
-    witness, the d ≥ 18 reduction convex_partition_counterexample_ge_18, and the
-    [AKS]-free variant convex_partition_counterexample_ge_36 (d ≥ 36). Note that
-    the explicit uniform quantifier (∀ mu ...) is proved internally rather than
-    exposed as a separate conjunct in the simplified Challenge.lean target.
+    witness, the d ≥ 18 reduction convex_partition_counterexample_ge_18, and
+    convex_partition_counterexample_ge_36 (d ≥ 36, taking 5d central blocking
+    markers without [AKS]). Note that the semialgebraic dimension count of
+    Lemma 5.1 requires 5d markers rather than 5d − 4, and that the explicit
+    uniform quantifier (∀ mu ...) is proved internally rather than exposed as a
+    separate conjunct in Challenge.lean.
 
 automation:
   methods:
@@ -135,15 +142,16 @@ alignment:
     - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorem B"
       lean: "AkopyanSixfold.convex_partition_counterexample"
       module: "Challenge"
-      status: "proved (conditional on Theorem C and IsBlocking p eta)"
+      status: "proved (conditional only on central IsBlocking p)"
       note: >-
         Formalizes Theorem B for an absolutely continuous probability measure in
-        every dimension d ≥ 24, conditional on Theorem C (g₀ : Δ¹¹⁹ → ℝ²²) and
-        an explicit blocking tuple of 5d markers (IsBlocking p eta). Solution.lean
-        also proves the [AKS]-free variant convex_partition_counterexample_ge_36
-        for d ≥ 36 via the fivefold join of Theorem A, alongside the binary join
-        lemma, join-padding (Lemma 3.3 / Corollary 3.4), 1-Lipschitz
-        Hausdorff-continuous inward-distance transfer (Lemma 5.3),
-        concentrated-measure fairness lemma (Lemma 5.4), and normalized Lebesgue
-        ball measure witness, while omitting Theorem C (Δ¹¹⁹ → ℝ²²) and the
-        semialgebraic blocking construction (Lemmas 5.1--5.2).
+        every dimension d ≥ 24, conditional only on an explicit central blocking
+        tuple of 5d − 4 markers (IsBlocking p), with neither g₀ nor eta as
+        hypotheses. Solution.lean proves the Blaschke selection theorem,
+        Lemma 5.2 (exists_eta_of_isBlocking), the binary join lemma, join-padding
+        from Theorem A (Lemma 3.3), 1-Lipschitz Hausdorff-continuous
+        inward-distance transfer (Lemma 5.3), concentrated-measure fairness lemma
+        (Lemma 5.4), and normalized Lebesgue ball witness, as well as the 5d
+        [AKS]-free version convex_partition_counterexample_ge_36 for d ≥ 36,
+        while omitting Theorem C (Δ¹¹⁹ → ℝ²²) and the semialgebraic blocking
+        construction (Theorem 4.1 / Lemma 5.1).
