@@ -15,18 +15,20 @@ Matches `Challenge.lean` via `comparator.json` without importing `Challenge.lean
   An almost six-embedding `Δ³⁵ → ℝ⁶`, proved via the height-table construction
   `Tverberg6R.tverbergCounterexample_of_heightExtension Tverberg6R.heightExtension`.
 * `AkopyanSixfold.convex_partition_counterexample` (Theorem B):
-  In every dimension `d ≥ 24`, given `5 * d - 4` central blocking markers `p`
-  (`IsBlocking p`), proves the Blaschke selection theorem (`blaschke_isCompact_subsets_unitBall`)
-  and central-avoidance lemma (`exists_eta_of_isBlocking`, Lemma 5.2), iterates join-padding
-  (`d - 8` times) from Theorem A to produce an almost six-embedding `Δ^(5d-5) → ℝ^(d-2)`,
-  transfers it via the Hausdorff-continuous inward-distance functional `inwardDist` to
-  `d - 1` continuous body functionals `Phi`, and proves that no fair convex six-partition
-  equalizes `Phi` for any `eta`-concentrated absolutely continuous measure (nor for a
-  normalized Lebesgue ball witness).
+  Unconditionally in every dimension `d ≥ 288`, proves the existence of `5 * d + 36`
+  central blocking markers (`exists_isBlocking`, via separating normals, normal rank ≤ 5
+  [Lemma 4.2], Gaussian elimination to RREF, and measure-zero polynomial parametrization),
+  derives `eta` via Blaschke compactness (`blaschke_isCompact_subsets_unitBall` /
+  `exists_eta_of_isBlocking`, Lemma 5.2), constructs an unconditional almost six-embedding
+  `Δ^(5d+35) → ℝ^(d-2)` by a 41-fold join of Theorem A plus join-padding (`kfold_tverberg_join`
+  / `padded_tverberg_ge_288`), and transfers it via `inwardDist` to `d - 1` continuous body
+  functionals `Phi` and an absolutely continuous probability measure `mu` without equalizing
+  convex six-partitions.
 * Additional results in `Solution.lean`:
   `join_almostSixEmbedding`, `tverberg_counterexample_ge_six` (`d ≥ 6`), `fivefold_tverberg_join`
   (`Δ¹⁷⁹ → ℝ³⁴`), `padded_tverberg_ge_36` (`d ≥ 36`), `twofold_seven_color_join`
   (`Δ⁴¹ → ℝ⁷` implies `Δ⁸³ → ℝ¹⁵`), `convex_partition_of_embedding_and_blocking`,
+  `convex_partition_counterexample_ge_24` (`d ≥ 24`, `5 * d - 4` central blocking markers),
   `convex_partition_counterexample_ge_36` (`d ≥ 36`, `5 * d` central blocking markers without `[AKS]`),
   and `convex_partition_counterexample_ge_18` (`d ≥ 18`, conditional on `Δ⁸⁹ → ℝ¹⁶` and
   `5 * d` central blocking markers).
@@ -369,6 +371,30 @@ theorem padded_tverberg_ge_36 (d : ℕ) (hd : 36 ≤ d) :
   obtain ⟨g, hg⟩ := iterated_padding_from (d - 36) hg₀
   exact reindex_almostSixEmbedding (by omega : 180 + 5 * (d - 36) = 5 * d)
     (by omega : 34 + (d - 36) = d - 2) hg
+
+/-- **General `(k + 1)`-fold binary join of Theorem A**: for every `k : ℕ`, there is an
+unconditional almost six-embedding `Δ^(36 * (k + 1) - 1) → ℝ^(7 * (k + 1) - 1)`. -/
+theorem kfold_tverberg_join (k : ℕ) :
+    ∃ f : (Fin (36 * (k + 1)) → ℝ) → (Fin (7 * (k + 1) - 1) → ℝ),
+      IsAlmostSixEmbedding f := by
+  induction k with
+  | zero => exact tverberg_counterexample
+  | succ k ih =>
+    obtain ⟨f₁, hf₁⟩ := ih
+    obtain ⟨f₀, hf₀⟩ := tverberg_counterexample
+    obtain ⟨f, hf⟩ := join_almostSixEmbedding hf₁ hf₀
+    exact reindex_almostSixEmbedding (by omega : 36 * (k + 1) + 36 = 36 * (k + 1 + 1))
+      (by omega : (7 * (k + 1) - 1) + 6 + 1 = 7 * (k + 1 + 1) - 1) hf
+
+/-- **Padded `41`-fold join (`d ≥ 288`, no `[AKS]`)**: for every `d ≥ 288`, there exists an
+unconditional almost six-embedding `Δ^(5d+35) → ℝ^(d-2)` (`5d + 36` vertices). -/
+theorem padded_tverberg_ge_288 (d : ℕ) (hd : 288 ≤ d) :
+    ∃ g : (Fin (5 * d + 36) → ℝ) → (Fin (d - 2) → ℝ),
+      IsAlmostSixEmbedding g := by
+  obtain ⟨g₀, hg₀⟩ := kfold_tverberg_join 40
+  obtain ⟨g, hg⟩ := iterated_padding_from (d - 288) hg₀
+  exact reindex_almostSixEmbedding (by omega : 36 * (40 + 1) + 5 * (d - 288) = 5 * d + 36)
+    (by omega : (7 * (40 + 1) - 1) + (d - 288) = d - 2) hg
 
 /-- **Twofold seven-color join**: given an almost six-embedding `f₇ : Δ⁴¹ → ℝ⁷`
 (Section 2.3 of the research report), its self-join gives an almost six-embedding
@@ -936,6 +962,955 @@ theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
   exact ⟨Phi, _, hPhi_cont, hprob, hac,
     fun C hC hfair => h_unif _ hac hpos htop hconc C hC hfair⟩
 
+/-! ### Helper 4: Central separating normals, Lemma 4.2, RREF, and generic blocking points -/
+
+private def nonEmptyIntParts {d : ℕ} (C : Fin 6 → Body d) : Finset (Fin 6) := by
+  classical exact Finset.univ.filter fun i => (interior (C i : Set (Ambient d))).Nonempty
+
+private lemma mem_nonEmptyIntParts {d : ℕ} (C : Fin 6 → Body d) {i : Fin 6} :
+    i ∈ nonEmptyIntParts C ↔ (interior (C i : Set (Ambient d))).Nonempty := by
+  classical
+  simp [nonEmptyIntParts]
+
+private lemma open_subset_biUnion_closed_empty_interior {E : Type*} [TopologicalSpace E]
+    {ι : Type*} [DecidableEq ι] (T : Finset ι) {f : ι → Set E}
+    (hclosed : ∀ i ∈ T, IsClosed (f i))
+    (hempty : ∀ i ∈ T, interior (f i) = ∅)
+    {U : Set E} (hU : IsOpen U) (hsub : U ⊆ ⋃ i ∈ T, f i) : U = ∅ := by
+  induction T using Finset.induction_on generalizing U with
+  | empty =>
+    simpa only [Finset.notMem_empty, Set.iUnion_false, Set.iUnion_empty, Set.subset_empty_iff]
+      using hsub
+  | @insert i₀ T' _ ih =>
+    have hclosed_T' : ∀ i ∈ T', IsClosed (f i) :=
+      fun i hi => hclosed i (Finset.mem_insert_of_mem hi)
+    have hempty_T' : ∀ i ∈ T', interior (f i) = ∅ :=
+      fun i hi => hempty i (Finset.mem_insert_of_mem hi)
+    have hU_sdiff : IsOpen (U \ f i₀) :=
+      hU.sdiff (hclosed i₀ (Finset.mem_insert_self i₀ T'))
+    have hsub_sdiff : U \ f i₀ ⊆ ⋃ i ∈ T', f i := by
+      rintro x ⟨hxU, hxnot⟩
+      have hx' := hsub hxU
+      simp only [Set.mem_iUnion, Finset.mem_insert] at hx' ⊢
+      rcases hx' with ⟨i, rfl | hi', hxi⟩
+      · exact False.elim (hxnot hxi)
+      · exact ⟨i, hi', hxi⟩
+    have hdiff_empty : U \ f i₀ = ∅ := ih hclosed_T' hempty_T' hU_sdiff hsub_sdiff
+    have hU_sub : U ⊆ f i₀ := Set.sdiff_eq_empty.mp hdiff_empty
+    have hU_sub_int : U ⊆ interior (f i₀) := interior_maximal hU_sub hU
+    rw [hempty i₀ (Finset.mem_insert_self i₀ T'), Set.subset_empty_iff] at hU_sub_int
+    exact hU_sub_int
+
+private lemma unitBall_subset_biUnion_nonempty_interior {d : ℕ}
+    (C : Fin 6 → Body d) (hcov : unitBall d = (⋃ i, (C i : Set (Ambient d)))) :
+    unitBall d ⊆ ⋃ i ∈ nonEmptyIntParts C, (C i : Set (Ambient d)) := by
+  classical
+  let S := nonEmptyIntParts C
+  let U : Set (Ambient d) :=
+    Metric.ball (0 : Ambient d) 1 \ ⋃ i ∈ S, (C i : Set (Ambient d))
+  have hS_closed : IsClosed (⋃ i ∈ S, (C i : Set (Ambient d))) :=
+    isClosed_biUnion_finset fun i _ => (C i).isClosed
+  have hU_open : IsOpen U := Metric.isOpen_ball.sdiff hS_closed
+  let T : Finset (Fin 6) := Finset.univ \ S
+  have hU_sub : U ⊆ ⋃ i ∈ T, (C i : Set (Ambient d)) := by
+    rintro x ⟨hx_ball, hx_notS⟩
+    have hx_unit : x ∈ unitBall d := Metric.ball_subset_closedBall hx_ball
+    rw [hcov, Set.mem_iUnion] at hx_unit
+    obtain ⟨i, hxi⟩ := hx_unit
+    have hi_notS : i ∉ S := fun hiS =>
+      hx_notS (Set.mem_iUnion₂.mpr ⟨i, hiS, hxi⟩)
+    have hiT : i ∈ T := Finset.mem_sdiff.mpr ⟨Finset.mem_univ i, hi_notS⟩
+    exact Set.mem_iUnion₂.mpr ⟨i, hiT, hxi⟩
+  have hU_empty : U = ∅ :=
+    open_subset_biUnion_closed_empty_interior T
+      (fun i _ => (C i).isClosed)
+      (fun i hi => by
+        have hi_notS : i ∉ S := (Finset.mem_sdiff.mp hi).2
+        rw [mem_nonEmptyIntParts] at hi_notS
+        exact Set.not_nonempty_iff_eq_empty.mp hi_notS)
+      hU_open hU_sub
+  have hball_sub : Metric.ball (0 : Ambient d) 1 ⊆ ⋃ i ∈ S, (C i : Set (Ambient d)) :=
+    Set.sdiff_eq_empty.mp hU_empty
+  have hcl := closure_mono hball_sub
+  rw [closure_ball (0 : Ambient d) one_ne_zero, hS_closed.closure_eq] at hcl
+  exact hcl
+
+private lemma exists_central_separating_normals {d : ℕ}
+    (C : Fin 6 → Body d)
+    (hdisj : ∀ i j, i ≠ j →
+      Disjoint (interior (C i : Set (Ambient d)))
+               (interior (C j : Set (Ambient d))))
+    (h0 : ∀ i, (0 : Ambient d) ∈ (C i : Set (Ambient d))) :
+    ∃ n : Fin 6 → Fin 6 → Ambient d,
+      (∀ i, n i i = 0) ∧
+      (∀ i j, n j i = - n i j) ∧
+      (∀ i j, i ∉ nonEmptyIntParts C ∨ j ∉ nonEmptyIntParts C → n i j = 0) ∧
+      (∀ i ∈ nonEmptyIntParts C, ∀ j ∈ nonEmptyIntParts C, i ≠ j →
+        n i j ≠ 0 ∧
+        (∀ y ∈ (C i : Set (Ambient d)), 0 ≤ ⟪n i j, y⟫_ℝ) ∧
+        (∀ y ∈ interior (C i : Set (Ambient d)), 0 < ⟪n i j, y⟫_ℝ) ∧
+        (∀ x ∈ (C j : Set (Ambient d)), ⟪n i j, x⟫_ℝ ≤ 0) ∧
+        (∀ x ∈ interior (C j : Set (Ambient d)), ⟪n i j, x⟫_ℝ < 0)) := by
+  let S := nonEmptyIntParts C
+  have h_pair_lt : ∀ i j : Fin 6, i ∈ S → j ∈ S → i < j →
+      ∃ v : Ambient d, v ≠ 0 ∧
+        (∀ y ∈ (C i : Set (Ambient d)), 0 ≤ ⟪v, y⟫_ℝ) ∧
+        (∀ y ∈ interior (C i : Set (Ambient d)), 0 < ⟪v, y⟫_ℝ) ∧
+        (∀ x ∈ (C j : Set (Ambient d)), ⟪v, x⟫_ℝ ≤ 0) ∧
+        (∀ x ∈ interior (C j : Set (Ambient d)), ⟪v, x⟫_ℝ < 0) := by
+    intro i j hiS hjS hij
+    have hi_ne : (interior (C i : Set (Ambient d))).Nonempty := (mem_nonEmptyIntParts C).mp hiS
+    have hj_ne : (interior (C j : Set (Ambient d))).Nonempty := (mem_nonEmptyIntParts C).mp hjS
+    obtain ⟨f, u, hf_lt, hf_gt⟩ := geometric_hahn_banach_open_open
+      (C j).convex.interior isOpen_interior (C i).convex.interior isOpen_interior
+      (hdisj j i hij.ne')
+    let v : Ambient d := (InnerProductSpace.toDual ℝ (Ambient d)).symm f
+    have hv_eq : ∀ z, ⟪v, z⟫_ℝ = f z := fun z => InnerProductSpace.toDual_symm_apply
+    have hCi_cl : closure (interior (C i : Set (Ambient d))) = (C i : Set (Ambient d)) :=
+      ((C i).convex.closure_interior_eq_closure_of_nonempty_interior hi_ne).trans
+        (C i).isClosed.closure_eq
+    have hCj_cl : closure (interior (C j : Set (Ambient d))) = (C j : Set (Ambient d)) :=
+      ((C j).convex.closure_interior_eq_closure_of_nonempty_interior hj_ne).trans
+        (C j).isClosed.closure_eq
+    have h_le_Ci : ∀ y ∈ (C i : Set (Ambient d)), u ≤ f y := by
+      have hsub : interior (C i : Set (Ambient d)) ⊆ {y | u ≤ f y} :=
+        fun y hy => (hf_gt y hy).le
+      have hclosed : IsClosed {y : Ambient d | u ≤ f y} :=
+        isClosed_le continuous_const f.continuous
+      intro y hy
+      rw [← hCi_cl] at hy
+      exact hclosed.closure_subset_iff.mpr hsub hy
+    have h_le_Cj : ∀ x ∈ (C j : Set (Ambient d)), f x ≤ u := by
+      have hsub : interior (C j : Set (Ambient d)) ⊆ {x | f x ≤ u} :=
+        fun x hx => (hf_lt x hx).le
+      have hclosed : IsClosed {x : Ambient d | f x ≤ u} :=
+        isClosed_le f.continuous continuous_const
+      intro x hx
+      rw [← hCj_cl] at hx
+      exact hclosed.closure_subset_iff.mpr hsub hx
+    have hu0 : u = 0 := by
+      have h0i := h_le_Ci 0 (h0 i)
+      have h0j := h_le_Cj 0 (h0 j)
+      rw [map_zero] at h0i h0j
+      linarith
+    subst hu0
+    obtain ⟨y₀, hy₀⟩ := hi_ne
+    have hv_ne : v ≠ 0 := by
+      intro hv0
+      have := hf_gt y₀ hy₀
+      rw [← hv_eq, hv0, inner_zero_left] at this
+      exact lt_irrefl 0 this
+    refine ⟨v, hv_ne, ?_, ?_, ?_, ?_⟩
+    · intro y hy; rw [hv_eq]; exact h_le_Ci y hy
+    · intro y hy; rw [hv_eq]; exact hf_gt y hy
+    · intro x hx; rw [hv_eq]; exact h_le_Cj x hx
+    · intro x hx; rw [hv_eq]; exact hf_lt x hx
+  classical
+  let n_lt : Fin 6 → Fin 6 → Ambient d := fun i j =>
+    if h : i ∈ S ∧ j ∈ S ∧ i < j then
+      Classical.choose (h_pair_lt i j h.1 h.2.1 h.2.2)
+    else 0
+  let n : Fin 6 → Fin 6 → Ambient d := fun i j =>
+    if i < j then n_lt i j else if j < i then - n_lt j i else 0
+  refine ⟨n, ?_, ?_, ?_, ?_⟩
+  · intro i
+    simp [n]
+  · intro i j
+    rcases lt_trichotomy i j with hij | rfl | hij
+    · have hnot : ¬ (j < i) := hij.not_gt
+      simp [n, hij, hnot]
+    · simp [n]
+    · have hnot : ¬ (i < j) := hij.not_gt
+      simp [n, hij, hnot]
+  · intro i j hij
+    have hn_lt : ∀ a b, a ∉ S ∨ b ∉ S → n_lt a b = 0 := fun a b hab => by
+      dsimp [n_lt]
+      split_ifs with h
+      · exact absurd h.1 (hab.elim id fun hb' => absurd h.2.1 hb')
+      · rfl
+    rcases lt_trichotomy i j with hij' | rfl | hij'
+    · simp [n, hij', hn_lt i j hij]
+    · simp [n]
+    · have hji : ¬ (i < j) := hij'.not_gt
+      simp [n, hij', hji, hn_lt j i hij.symm]
+  · intro i hiS j hjS hij_ne
+    rcases lt_or_gt_of_ne hij_ne with hij | hij
+    · have hspec := Classical.choose_spec (h_pair_lt i j hiS hjS hij)
+      have hn_eq : n i j = n_lt i j := by simp [n, hij]
+      have hn_lt_eq : n_lt i j = Classical.choose (h_pair_lt i j hiS hjS hij) := by
+        dsimp [n_lt]
+        split_ifs with h'
+        · rfl
+        · exact False.elim (h' ⟨hiS, hjS, hij⟩)
+      simpa [hn_eq, hn_lt_eq] using hspec
+    · have hspec := Classical.choose_spec (h_pair_lt j i hjS hiS hij)
+      have hn_eq : n i j = - n_lt j i := by simp [n, hij, hij.not_gt]
+      have hn_lt_eq : n_lt j i = Classical.choose (h_pair_lt j i hjS hiS hij) := by
+        dsimp [n_lt]
+        split_ifs with h'
+        · rfl
+        · exact False.elim (h' ⟨hjS, hiS, hij⟩)
+      rw [hn_eq, hn_lt_eq]
+      rcases hspec with ⟨hv_ne, hCj, hCj_int, hCi, hCi_int⟩
+      refine ⟨neg_ne_zero.mpr hv_ne, ?_, ?_, ?_, ?_⟩
+      · intro y hy; rw [inner_neg_left]; linarith [hCi y hy]
+      · intro y hy; rw [inner_neg_left]; linarith [hCi_int y hy]
+      · intro x hx; rw [inner_neg_left]; linarith [hCj x hx]
+      · intro x hx; rw [inner_neg_left]; linarith [hCj_int x hx]
+
+private lemma skeleton_in_separating_hyperplanes {d : ℕ}
+    (C : Fin 6 → Body d)
+    (hcov : unitBall d = (⋃ i, (C i : Set (Ambient d))))
+    (n : Fin 6 → Fin 6 → Ambient d)
+    (hsep : ∀ i ∈ nonEmptyIntParts C, ∀ j ∈ nonEmptyIntParts C, i ≠ j →
+      (∀ y ∈ (C i : Set (Ambient d)), 0 ≤ ⟪n i j, y⟫_ℝ) ∧
+      (∀ x ∈ (C j : Set (Ambient d)), ⟪n i j, x⟫_ℝ ≤ 0))
+    (hsym : ∀ i j, n j i = - n i j)
+    {x : Ambient d} (hx_ball : x ∈ Metric.ball (0 : Ambient d) 1)
+    (hx_not_int : ∀ i : Fin 6, x ∉ interior (C i : Set (Ambient d))) :
+    ∃ i ∈ nonEmptyIntParts C, ∃ j ∈ nonEmptyIntParts C, i < j ∧ ⟪n i j, x⟫_ℝ = 0 := by
+  classical
+  let S := nonEmptyIntParts C
+  have hS_cov := unitBall_subset_biUnion_nonempty_interior C hcov
+  have hx_S : x ∈ ⋃ i ∈ S, (C i : Set (Ambient d)) :=
+    hS_cov (Metric.ball_subset_closedBall hx_ball)
+  rw [Set.mem_iUnion₂] at hx_S
+  obtain ⟨i, hiS, hxi⟩ := hx_S
+  have hex_j : ∃ j ∈ S, j ≠ i ∧ ⟪n i j, x⟫_ℝ = 0 := by
+    by_contra h_none
+    push Not at h_none
+    have hpos_j : ∀ j ∈ S.erase i, 0 < ⟪n i j, x⟫_ℝ := by
+      intro j hj
+      have hjS : j ∈ S := (Finset.mem_erase.mp hj).2
+      have hji : j ≠ i := (Finset.mem_erase.mp hj).1
+      have hle : 0 ≤ ⟪n i j, x⟫_ℝ := (hsep i hiS j hjS hji.symm).1 x hxi
+      exact lt_of_le_of_ne hle (Ne.symm (h_none j hjS hji))
+    let U : Set (Ambient d) :=
+      Metric.ball (0 : Ambient d) 1 ∩ ⋂ j ∈ S.erase i, {y : Ambient d | 0 < ⟪n i j, y⟫_ℝ}
+    have hU_open : IsOpen U :=
+      Metric.isOpen_ball.inter <| isOpen_biInter_finset fun j _ =>
+        isOpen_lt continuous_const (continuous_const.inner continuous_id)
+    have hxU : x ∈ U := ⟨hx_ball, Set.mem_iInter₂.mpr hpos_j⟩
+    have hU_sub : U ⊆ (C i : Set (Ambient d)) := by
+      intro y hyU
+      have hy_S : y ∈ ⋃ k ∈ S, (C k : Set (Ambient d)) :=
+        hS_cov (Metric.ball_subset_closedBall hyU.1)
+      rw [Set.mem_iUnion₂] at hy_S
+      obtain ⟨k, hkS, hyk⟩ := hy_S
+      by_cases hki : k = i
+      · exact hki ▸ hyk
+      · have hk_er : k ∈ S.erase i := Finset.mem_erase.mpr ⟨hki, hkS⟩
+        have hpos : 0 < ⟪n i k, y⟫_ℝ := Set.mem_iInter₂.mp hyU.2 k hk_er
+        have hle : ⟪n i k, y⟫_ℝ ≤ 0 := (hsep i hiS k hkS (Ne.symm hki)).2 y hyk
+        exact False.elim (not_lt_of_ge hle hpos)
+    exact hx_not_int i (interior_maximal hU_sub hU_open hxU)
+  obtain ⟨j, hjS, hji, hzero⟩ := hex_j
+  rcases lt_or_gt_of_ne hji with hij | hij
+  · refine ⟨j, hjS, i, hiS, hij, ?_⟩
+    rw [hsym, inner_neg_left, hzero, neg_zero]
+  · exact ⟨i, hiS, j, hjS, hij, hzero⟩
+
+/-- **Lemma 4.2 (Normal rank ≤ 5)**: for separating normals `n` of a central six-partition,
+the vectors `a i = ∑ j, n i j` annihilate the same vectors as all `n i j`. -/
+private lemma central_partition_normal_rank {d : ℕ}
+    (C : Fin 6 → Body d)
+    (hcov : unitBall d = (⋃ i, (C i : Set (Ambient d))))
+    (n : Fin 6 → Fin 6 → Ambient d)
+    (hnotS : ∀ i j, i ∉ nonEmptyIntParts C ∨ j ∉ nonEmptyIntParts C → n i j = 0)
+    (hsep : ∀ i ∈ nonEmptyIntParts C, ∀ j ∈ nonEmptyIntParts C, i ≠ j →
+      (∀ y ∈ (C i : Set (Ambient d)), 0 ≤ ⟪n i j, y⟫_ℝ) ∧
+      (∀ y ∈ interior (C i : Set (Ambient d)), 0 < ⟪n i j, y⟫_ℝ))
+    (hsym : ∀ i j, n j i = - n i j)
+    {v : Ambient d}
+    (hv : ∀ i : Fin 6, ⟪∑ j : Fin 6, n i j, v⟫_ℝ = 0) :
+    ∀ i j : Fin 6, ⟪n i j, v⟫_ℝ = 0 := by
+  classical
+  let S := nonEmptyIntParts C
+  have hS_cov := unitBall_subset_biUnion_nonempty_interior C hcov
+  let Sv : Finset (Fin 6) := S.filter fun i => ∀ j ∈ S, 0 ≤ ⟪n i j, v⟫_ℝ
+  have hSv_zero : ∀ i ∈ Sv, ∀ j : Fin 6, ⟪n i j, v⟫_ℝ = 0 := by
+    intro i hiSv
+    have hiS : i ∈ S := (Finset.mem_filter.mp hiSv).1
+    have hnonneg_S : ∀ j ∈ S, 0 ≤ ⟪n i j, v⟫_ℝ := (Finset.mem_filter.mp hiSv).2
+    have hnonneg : ∀ j ∈ (Finset.univ : Finset (Fin 6)), 0 ≤ ⟪n i j, v⟫_ℝ := by
+      intro j _
+      by_cases hjS : j ∈ S
+      · exact hnonneg_S j hjS
+      · simp [hnotS i j (Or.inr hjS)]
+    have hsum0 : ∑ j : Fin 6, ⟪n i j, v⟫_ℝ = 0 := by
+      simpa only [sum_inner] using hv i
+    intro j
+    exact (Finset.sum_eq_zero_iff_of_nonneg hnonneg).mp hsum0 j (Finset.mem_univ j)
+  have hzero_diag : ∀ i : Fin 6, n i i = 0 := fun i => by
+    have hadd : n i i + n i i = 0 := by
+      conv_lhs => rhs; rw [hsym i i]
+      exact add_neg_cancel _
+    have h2 : (2 : ℝ) • n i i = 0 := by rwa [two_smul]
+    exact (smul_eq_zero.mp h2).resolve_left two_ne_zero
+  have hSv_ne : Sv.Nonempty := by
+    let α : ℝ := (‖v‖ + 1)⁻¹
+    have hα_pos : 0 < α := inv_pos.mpr (by positivity)
+    let w : Ambient d := α • v
+    have hw_ball : w ∈ unitBall d := by
+      change dist (α • v) 0 ≤ 1
+      rw [dist_zero_right, norm_smul, Real.norm_of_nonneg hα_pos.le]
+      dsimp [α]
+      rw [inv_mul_le_one₀ (by positivity)]
+      linarith
+    have hw_S : w ∈ ⋃ i ∈ S, (C i : Set (Ambient d)) := hS_cov hw_ball
+    rw [Set.mem_iUnion₂] at hw_S
+    obtain ⟨i, hiS, hwi⟩ := hw_S
+    refine ⟨i, Finset.mem_filter.mpr ⟨hiS, fun j hjS => ?_⟩⟩
+    by_cases hij : i = j
+    · subst hij
+      rw [hzero_diag i, inner_zero_left]
+    · have hnonneg_w : 0 ≤ ⟪n i j, w⟫_ℝ := (hsep i hiS j hjS hij).1 w hwi
+      dsimp [w] at hnonneg_w
+      rw [real_inner_smul_right] at hnonneg_w
+      exact nonneg_of_mul_nonneg_right hnonneg_w hα_pos
+  have hS_sub_Sv : S ⊆ Sv := by
+    by_contra hnot_sub
+    obtain ⟨k, hkS, hk_not_Sv⟩ := Finset.not_subset.mp hnot_sub
+    have hk_ne : (interior (C k : Set (Ambient d))).Nonempty := (mem_nonEmptyIntParts C).mp hkS
+    obtain ⟨x, hx_int⟩ := hk_ne
+    have hex_neg : ∀ i ∈ S \ Sv, ∃ j ∈ S, ⟪n i j, v⟫_ℝ < 0 := by
+      intro i hi
+      obtain ⟨hiS, hi_not_Sv⟩ := Finset.mem_sdiff.mp hi
+      have hnot : ¬ ∀ j ∈ S, 0 ≤ ⟪n i j, v⟫_ℝ := fun h =>
+        hi_not_Sv (Finset.mem_filter.mpr ⟨hiS, h⟩)
+      push Not at hnot
+      exact hnot
+    choose jOf hjOf_mem hjOf_neg using hex_neg
+    let t : ℝ :=
+      1 + ∑ i ∈ S \ Sv,
+        if hi : i ∈ S \ Sv then |⟪n i (jOf i hi), x⟫_ℝ| / (-⟪n i (jOf i hi), v⟫_ℝ) else 0
+    have hterm_nonneg : ∀ i ∈ S \ Sv,
+        0 ≤ (if hi : i ∈ S \ Sv then |⟪n i (jOf i hi), x⟫_ℝ| / (-⟪n i (jOf i hi), v⟫_ℝ) else 0) := by
+      intro i hi
+      simp only [hi, ↓reduceDIte]
+      exact div_nonneg (abs_nonneg _) (by linarith [hjOf_neg i hi])
+    have ht_pos : 0 < t := by
+      have hsum_nn := Finset.sum_nonneg hterm_nonneg
+      dsimp [t]
+      linarith
+    let y : Ambient d := x + t • v
+    let β : ℝ := (‖y‖ + 1)⁻¹
+    have hβ_pos : 0 < β := inv_pos.mpr (by positivity)
+    let z : Ambient d := β • y
+    have hz_ball : z ∈ unitBall d := by
+      change dist (β • y) 0 ≤ 1
+      rw [dist_zero_right, norm_smul, Real.norm_of_nonneg hβ_pos.le]
+      dsimp [β]
+      rw [inv_mul_le_one₀ (by positivity)]
+      linarith
+    have hz_S : z ∈ ⋃ m ∈ S, (C m : Set (Ambient d)) := hS_cov hz_ball
+    rw [Set.mem_iUnion₂] at hz_S
+    obtain ⟨m, hmS, hzm⟩ := hz_S
+    have hy_nonneg : ∀ j ∈ S, m ≠ j → 0 ≤ ⟪n m j, y⟫_ℝ := by
+      intro j hjS hmj
+      have hzw : 0 ≤ ⟪n m j, z⟫_ℝ := (hsep m hmS j hjS hmj).1 z hzm
+      dsimp [z] at hzw
+      rw [real_inner_smul_right] at hzw
+      exact nonneg_of_mul_nonneg_right hzw hβ_pos
+    by_cases hmSv : m ∈ Sv
+    · have hmk_ne : m ≠ k := fun h => hk_not_Sv (h ▸ hmSv)
+      have hy_mk : 0 ≤ ⟪n m k, y⟫_ℝ := hy_nonneg k hkS hmk_ne
+      have hv_mk : ⟪n m k, v⟫_ℝ = 0 := hSv_zero m hmSv k
+      have hx_km : 0 < ⟪n k m, x⟫_ℝ := (hsep k hkS m hmS hmk_ne.symm).2 x hx_int
+      have hx_mk : ⟪n m k, x⟫_ℝ < 0 := by
+        rw [hsym k m, inner_neg_left]
+        linarith
+      dsimp [y] at hy_mk
+      rw [inner_add_right, real_inner_smul_right, hv_mk, mul_zero, add_zero] at hy_mk
+      linarith
+    · have hm_sdiff : m ∈ S \ Sv := Finset.mem_sdiff.mpr ⟨hmS, hmSv⟩
+      let j : Fin 6 := jOf m hm_sdiff
+      have hjS : j ∈ S := hjOf_mem m hm_sdiff
+      have hv_mj : ⟪n m j, v⟫_ℝ < 0 := hjOf_neg m hm_sdiff
+      have hmj_ne : m ≠ j := by
+        intro hmj
+        have hm0 : ⟪n m m, v⟫_ℝ = 0 := by rw [hzero_diag m, inner_zero_left]
+        rw [← hmj, hm0] at hv_mj
+        exact lt_irrefl 0 hv_mj
+      have hy_mj : 0 ≤ ⟪n m j, y⟫_ℝ := hy_nonneg j hjS hmj_ne
+      have hsingle :
+          |⟪n m j, x⟫_ℝ| / (-⟪n m j, v⟫_ℝ) ≤
+            ∑ i ∈ S \ Sv,
+              if hi : i ∈ S \ Sv then |⟪n i (jOf i hi), x⟫_ℝ| / (-⟪n i (jOf i hi), v⟫_ℝ) else 0 := by
+        have hle := Finset.single_le_sum hterm_nonneg hm_sdiff
+        simpa [hm_sdiff, j] using hle
+      have hb_pos : 0 < -⟪n m j, v⟫_ℝ := by linarith
+      have ht_gt : |⟪n m j, x⟫_ℝ| / (-⟪n m j, v⟫_ℝ) < t := by
+        dsimp [t]
+        linarith
+      have hmul_gt : |⟪n m j, x⟫_ℝ| < t * (-⟪n m j, v⟫_ℝ) :=
+        (div_lt_iff₀ hb_pos).mp ht_gt
+      have h_le_abs : ⟪n m j, x⟫_ℝ ≤ |⟪n m j, x⟫_ℝ| := le_abs_self _
+      dsimp [y] at hy_mj
+      rw [inner_add_right, real_inner_smul_right] at hy_mj
+      linarith
+  intro i j
+  by_cases hiS : i ∈ S
+  · exact hSv_zero i (hS_sub_Sv hiS) j
+  · simp [hnotS i j (Or.inl hiS)]
+
+/-- Gaussian elimination to Reduced Row Echelon Form (RREF) for any tuple of `k ≤ d` vectors. -/
+private lemma exists_rref {d : ℕ} (k : ℕ) (hk : k ≤ d) (A : Fin k → Ambient d) :
+    ∃ (I : Fin k → Fin d) (u : Fin k → Ambient d),
+      Function.Injective I ∧
+      (∀ r s : Fin k, u r (I s) = if r = s then 1 else 0) ∧
+      (∀ t : Fin k, A t ∈ Submodule.span ℝ (Set.range u)) := by
+  induction k with
+  | zero =>
+    exact ⟨finZeroElim, finZeroElim, Function.injective_of_subsingleton _,
+      fun r => r.elim0, fun t => t.elim0⟩
+  | succ k ih =>
+    let A' : Fin k → Ambient d := fun t => A t.castSucc
+    obtain ⟨I', u', hI'_inj, hu'_rref, hA'_span⟩ := ih (by omega : k ≤ d) A'
+    let w : Ambient d := A (Fin.last k)
+    let w' : Ambient d := w - ∑ r : Fin k, (w (I' r)) • u' r
+    have hw'_piv : ∀ s : Fin k, w' (I' s) = 0 := fun s => by
+      have h1 : (∑ r : Fin k, (w (I' r)) • u' r) (I' s) =
+          ∑ r : Fin k, w (I' r) * u' r (I' s) := by
+        simp [Finset.sum_apply, smul_eq_mul]
+      change w (I' s) - (∑ r : Fin k, (w (I' r)) • u' r) (I' s) = 0
+      rw [h1]
+      have h2 : ∑ r : Fin k, w (I' r) * u' r (I' s) = w (I' s) := by
+        simp [hu'_rref]
+      linarith
+    have hex_step : ∃ (j₀ : Fin d) (u_new : Ambient d),
+        (∀ s : Fin k, I' s ≠ j₀) ∧
+        u_new j₀ = 1 ∧
+        (∀ s : Fin k, u_new (I' s) = 0) ∧
+        w' ∈ Submodule.span ℝ ({u_new} : Set (Ambient d)) := by
+      by_cases hw'0 : w' = 0
+      · have hnot_sub : ¬ Finset.univ ⊆ Finset.univ.image I' := by
+          intro hsub
+          have hcard := Finset.card_le_card hsub
+          have hcard_img : (Finset.univ.image I').card ≤ k :=
+            Finset.card_image_le.trans (by simp)
+          rw [Finset.card_univ, Fintype.card_fin] at hcard
+          omega
+        obtain ⟨j₀, _, hj₀_not⟩ := Finset.not_subset.mp hnot_sub
+        have hj₀_ne : ∀ s : Fin k, I' s ≠ j₀ := fun s h =>
+          hj₀_not (Finset.mem_image.mpr ⟨s, Finset.mem_univ s, h⟩)
+        let u_new : Ambient d := EuclideanSpace.single j₀ (1 : ℝ)
+        refine ⟨j₀, u_new, hj₀_ne, ?_, ?_, ?_⟩
+        · simp [u_new, EuclideanSpace.single]
+        · intro s
+          simp [u_new, EuclideanSpace.single, (hj₀_ne s).symm]
+        · rw [hw'0]
+          exact Submodule.zero_mem _
+      · have hex_j : ∃ j₀ : Fin d, w' j₀ ≠ 0 := by
+          by_contra hall
+          push Not at hall
+          exact hw'0 (PiLp.ext hall)
+        obtain ⟨j₀, hj₀_ne0⟩ := hex_j
+        have hj₀_ne : ∀ s : Fin k, I' s ≠ j₀ := fun s h => by
+          rw [← h] at hj₀_ne0
+          exact hj₀_ne0 (hw'_piv s)
+        let u_new : Ambient d := (w' j₀)⁻¹ • w'
+        refine ⟨j₀, u_new, hj₀_ne, ?_, ?_, ?_⟩
+        · change (w' j₀)⁻¹ * w' j₀ = 1
+          exact inv_mul_cancel₀ hj₀_ne0
+        · intro s
+          change (w' j₀)⁻¹ * w' (I' s) = 0
+          rw [hw'_piv s, mul_zero]
+        · have hw'_eq : w' = (w' j₀) • u_new := by
+            dsimp [u_new]
+            rw [smul_smul, mul_inv_cancel₀ hj₀_ne0, one_smul]
+          rw [hw'_eq]
+          exact Submodule.smul_mem _ _ (Submodule.subset_span (Set.mem_singleton u_new))
+    obtain ⟨j₀, u_new, hj₀_ne, hu_new_j0, hu_new_piv, hw'_span⟩ := hex_step
+    let I : Fin (k + 1) → Fin d := Fin.snoc I' j₀
+    let u : Fin (k + 1) → Ambient d :=
+      Fin.snoc (fun r : Fin k => u' r - (u' r j₀) • u_new) u_new
+    refine ⟨I, u, ?_, ?_, ?_⟩
+    · intro a b hab
+      rcases Fin.eq_castSucc_or_eq_last a with ⟨a', rfl⟩ | rfl <;>
+        rcases Fin.eq_castSucc_or_eq_last b with ⟨b', rfl⟩ | rfl
+      · have hab' : I' a' = I' b' := by simpa [I] using hab
+        exact congrArg Fin.castSucc (hI'_inj hab')
+      · have hab' : I' a' = j₀ := by simpa [I] using hab
+        exact False.elim (hj₀_ne a' hab')
+      · have hab' : j₀ = I' b' := by simpa [I] using hab
+        exact False.elim (hj₀_ne b' hab'.symm)
+      · rfl
+    · intro r s
+      refine Fin.lastCases ?_ (fun r' => ?_) r <;>
+        refine Fin.lastCases ?_ (fun s' => ?_) s
+      · simp [I, u, hu_new_j0]
+      · have hne : Fin.last k ≠ s'.castSucc := (Fin.castSucc_lt_last s').ne'
+        change u (Fin.last k) (I s'.castSucc) = if Fin.last k = s'.castSucc then 1 else 0
+        simp [hne, I, u, hu_new_piv s']
+      · have hne : r'.castSucc ≠ Fin.last k := (Fin.castSucc_lt_last r').ne
+        change u r'.castSucc (I (Fin.last k)) = if r'.castSucc = Fin.last k then 1 else 0
+        simp [hne, I, u, PiLp.sub_apply, PiLp.smul_apply, smul_eq_mul, hu_new_j0]
+      · simp only [Fin.castSucc_inj]
+        have hstep : (u' r' - (u' r' j₀) • u_new) (I' s') = if r' = s' then 1 else 0 := by
+          change (u' r' (I' s')) - (u' r' j₀) * u_new (I' s') = if r' = s' then 1 else 0
+          rw [hu_new_piv s', mul_zero, sub_zero, hu'_rref r' s']
+        simpa [I, u] using hstep
+    · have hu_new_mem : u_new ∈ Submodule.span ℝ (Set.range u) :=
+        Submodule.subset_span ⟨Fin.last k, by simp [u]⟩
+      have hu'_mem : ∀ r : Fin k, u' r ∈ Submodule.span ℝ (Set.range u) := fun r => by
+        have hmem : u r.castSucc ∈ Submodule.span ℝ (Set.range u) :=
+          Submodule.subset_span ⟨r.castSucc, rfl⟩
+        have heq : u' r = u r.castSucc + (u' r j₀) • u_new := by
+          simp [u]
+        rw [heq]
+        exact Submodule.add_mem _ hmem (Submodule.smul_mem _ _ hu_new_mem)
+      have hspan_le : Submodule.span ℝ (Set.range u') ≤ Submodule.span ℝ (Set.range u) :=
+        Submodule.span_le.mpr (by rintro x ⟨r, rfl⟩; exact hu'_mem r)
+      have hw'_mem : w' ∈ Submodule.span ℝ (Set.range u) := by
+        have hle : Submodule.span ℝ ({u_new} : Set (Ambient d)) ≤ Submodule.span ℝ (Set.range u) :=
+          Submodule.span_le.mpr (Set.singleton_subset_iff.mpr hu_new_mem)
+        exact hle hw'_span
+      intro t
+      refine Fin.lastCases ?_ (fun t' => ?_) t
+      · have hw_eq : A (Fin.last k) = w' + ∑ r : Fin k, (w (I' r)) • u' r := by
+          dsimp [w', w]
+          abel
+        rw [hw_eq]
+        refine Submodule.add_mem _ hw'_mem (Submodule.sum_mem _ fun r _ => ?_)
+        exact Submodule.smul_mem _ _ (hu'_mem r)
+      · exact hspan_le (hA'_span t')
+
+/-- Pairwise separating normals of a central six-partition lie in the RREF span of
+the 5 row vectors `a₁, ..., a₅`. -/
+private lemma separating_normals_in_rref_span {d : ℕ} (hd : 5 ≤ d)
+    (C : Fin 6 → Body d)
+    (hcov : unitBall d = (⋃ i, (C i : Set (Ambient d))))
+    (hdisj : ∀ i j, i ≠ j →
+      Disjoint (interior (C i : Set (Ambient d)))
+               (interior (C j : Set (Ambient d))))
+    (h0 : ∀ i, (0 : Ambient d) ∈ (C i : Set (Ambient d))) :
+    ∃ (n : Fin 6 → Fin 6 → Ambient d) (I : Fin 5 → Fin d) (u : Fin 5 → Ambient d),
+      Function.Injective I ∧
+      (∀ r s : Fin 5, u r (I s) = if r = s then 1 else 0) ∧
+      (∀ i, n i i = 0) ∧
+      (∀ i j, n j i = - n i j) ∧
+      (∀ i j, i ∉ nonEmptyIntParts C ∨ j ∉ nonEmptyIntParts C → n i j = 0) ∧
+      (∀ i ∈ nonEmptyIntParts C, ∀ j ∈ nonEmptyIntParts C, i ≠ j → n i j ≠ 0) ∧
+      (∀ i ∈ nonEmptyIntParts C, ∀ j ∈ nonEmptyIntParts C, i ≠ j →
+        (∀ y ∈ (C i : Set (Ambient d)), 0 ≤ ⟪n i j, y⟫_ℝ) ∧
+        (∀ x ∈ (C j : Set (Ambient d)), ⟪n i j, x⟫_ℝ ≤ 0)) ∧
+      (∀ k l : Fin 6, ∀ j : Fin d,
+        n k l j = ∑ r : Fin 5, n k l (I r) * u r j) := by
+  obtain ⟨n, hnii, hnsym, hnnotS, hnsep⟩ := exists_central_separating_normals C hdisj h0
+  let a : Fin 6 → Ambient d := fun i => ∑ j : Fin 6, n i j
+  have ha_sum0 : ∑ i : Fin 6, a i = 0 := by
+    have hneg : ∑ i : Fin 6, a i = - ∑ i : Fin 6, a i := by
+      calc ∑ i : Fin 6, a i
+          = ∑ i : Fin 6, ∑ j : Fin 6, n i j := rfl
+        _ = ∑ j : Fin 6, ∑ i : Fin 6, n i j := Finset.sum_comm
+        _ = ∑ j : Fin 6, ∑ i : Fin 6, (- n j i) := by
+          refine Finset.sum_congr rfl fun j _ => Finset.sum_congr rfl fun i _ => ?_
+          rw [hnsym j i]
+        _ = - ∑ j : Fin 6, ∑ i : Fin 6, n j i := by
+          simp [Finset.sum_neg_distrib]
+    have hadd : (∑ i : Fin 6, a i) + (∑ i : Fin 6, a i) = 0 := by
+      conv_lhs => rhs; rw [hneg]
+      exact add_neg_cancel _
+    have h2 : (2 : ℝ) • (∑ i : Fin 6, a i) = 0 := by rwa [two_smul]
+    exact (smul_eq_zero.mp h2).resolve_left two_ne_zero
+  let A : Fin 5 → Ambient d := fun t => a t.succ
+  obtain ⟨I, u, hI_inj, hu_rref, hA_span⟩ := exists_rref 5 hd A
+  have ha_span : ∀ i : Fin 6, a i ∈ Submodule.span ℝ (Set.range u) := fun i => by
+    refine Fin.cases ?_ (fun t => hA_span t) i
+    have ha0 : a 0 = - ∑ t : Fin 5, A t := by
+      have hsplit : a 0 + ∑ t : Fin 5, a t.succ = 0 := by
+        simpa only [← Fin.sum_univ_succ] using ha_sum0
+      exact eq_neg_of_add_eq_zero_left hsplit
+    rw [ha0]
+    exact Submodule.neg_mem _ (Submodule.sum_mem _ fun t _ => hA_span t)
+  have hinner_single : ∀ (w : Ambient d) (j : Fin d),
+      ⟪w, EuclideanSpace.single j (1 : ℝ)⟫_ℝ = w j := fun w j => by
+    rw [EuclideanSpace.inner_single_right, one_mul]
+    simp
+  have hspan_perp : ∀ {v : Ambient d},
+      (∀ r : Fin 5, ⟪u r, v⟫_ℝ = 0) →
+      ∀ i : Fin 6, ⟪a i, v⟫_ℝ = 0 := by
+    intro v hv i
+    refine Submodule.span_induction ?_ ?_ ?_ ?_ (ha_span i)
+    · rintro _ ⟨r, rfl⟩; exact hv r
+    · simp
+    · intro x y _ _ hx hy; rw [inner_add_left, hx, hy, add_zero]
+    · intro c x _ hx; rw [real_inner_smul_left, hx, mul_zero]
+  have hcoef : ∀ k l : Fin 6, ∀ j : Fin d,
+      n k l j = ∑ r : Fin 5, n k l (I r) * u r j := by
+    intro k l j
+    let v : Ambient d :=
+      EuclideanSpace.single j (1 : ℝ) -
+        ∑ r : Fin 5, (u r j) • EuclideanSpace.single (I r) (1 : ℝ)
+    have hv_u : ∀ s : Fin 5, ⟪u s, v⟫_ℝ = 0 := fun s => by
+      dsimp [v]
+      rw [inner_sub_right, inner_sum, hinner_single]
+      have hsum : (∑ r : Fin 5, ⟪u s, (u r j) • EuclideanSpace.single (I r) (1 : ℝ)⟫_ℝ) = u s j := by
+        calc ∑ r : Fin 5, ⟪u s, (u r j) • EuclideanSpace.single (I r) (1 : ℝ)⟫_ℝ
+            = ∑ r : Fin 5, u r j * u s (I r) := by
+              refine Finset.sum_congr rfl fun r _ => ?_
+              rw [real_inner_smul_right, hinner_single]
+          _ = ∑ r : Fin 5, u r j * (if s = r then 1 else 0) := by
+              refine Finset.sum_congr rfl fun r _ => ?_
+              rw [hu_rref s r]
+          _ = u s j := by simp
+      rw [hsum, sub_self]
+    have hv_n : ⟪n k l, v⟫_ℝ = 0 :=
+      central_partition_normal_rank C hcov n hnnotS
+        (fun i hiS j hjS hij =>
+          ⟨(hnsep i hiS j hjS hij).2.1, (hnsep i hiS j hjS hij).2.2.1⟩)
+        hnsym (hspan_perp hv_u) k l
+    dsimp [v] at hv_n
+    rw [inner_sub_right, inner_sum, hinner_single] at hv_n
+    have hsum_n :
+        (∑ r : Fin 5, ⟪n k l, (u r j) • EuclideanSpace.single (I r) (1 : ℝ)⟫_ℝ) =
+          ∑ r : Fin 5, n k l (I r) * u r j := by
+      refine Finset.sum_congr rfl fun r _ => ?_
+      rw [real_inner_smul_right, hinner_single, mul_comm]
+    linarith [hv_n, hsum_n]
+  refine ⟨n, I, u, hI_inj, hu_rref, hnii, hnsym, hnnotS,
+    (fun i hiS j hjS hij => (hnsep i hiS j hjS hij).1),
+    (fun i hiS j hjS hij => ⟨(hnsep i hiS j hjS hij).2.1, (hnsep i hiS j hjS hij).2.2.2.1⟩),
+    hcoef⟩
+
+private abbrev Pairs6 := {e : Fin 6 × Fin 6 // e.1 < e.2}
+
+private lemma card_pairs6 : Fintype.card Pairs6 = 15 := by decide
+
+private abbrev ParamIdx {d m : ℕ}
+    (I : Fin 5 → Fin d) (rDom : Pairs6 → Fin 5) (σ : Fin m → Pairs6) :=
+  (Fin 5 × {j : Fin d // ∀ r, I r ≠ j}) ⊕
+  ((e : Pairs6) × {r : Fin 5 // r ≠ rDom e}) ⊕
+  ((a : Fin m) × {j : Fin d // j ≠ I (rDom (σ a))})
+
+private structure DiscreteConfig (d m : ℕ) where
+  I : {I : Fin 5 → Fin d // Function.Injective I}
+  rDom : Pairs6 → Fin 5
+  σ : Fin m → Pairs6
+
+private instance (d m : ℕ) : Finite (DiscreteConfig d m) :=
+  Finite.of_injective
+    (fun c : DiscreteConfig d m => (c.I, c.rDom, c.σ))
+    (fun c₁ c₂ h => by
+      cases c₁; cases c₂
+      simp only [Prod.mk.injEq] at h
+      rcases h with ⟨rfl, rfl, rfl⟩
+      rfl)
+
+private def evalPoints {d m : ℕ} (z : Fin (m * d) → ℝ) : Fin m → Ambient d :=
+  fun a => (EuclideanSpace.equiv (Fin d) ℝ).symm fun j => z (finProdFinEquiv (a, j))
+
+private lemma continuous_evalPoints {d m : ℕ} :
+    Continuous (evalPoints (d := d) (m := m)) := by
+  refine continuous_pi fun a => ?_
+  exact (EuclideanSpace.equiv (Fin d) ℝ).symm.continuous.comp <|
+    continuous_pi fun j => continuous_apply (finProdFinEquiv (a, j))
+
+private def paramU {d m : ℕ} (c : DiscreteConfig d m)
+    (y : ParamIdx c.I.1 c.rDom c.σ → ℝ) (r : Fin 5) (j : Fin d) : ℝ :=
+  if _h : c.I.1 r = j then 1
+  else if h' : ∃ s : Fin 5, c.I.1 s = j then 0
+  else y (Sum.inl (r, ⟨j, fun s hs => h' ⟨s, hs⟩⟩))
+
+private def paramC {d m : ℕ} (c : DiscreteConfig d m)
+    (y : ParamIdx c.I.1 c.rDom c.σ → ℝ) (e : Pairs6) (r : Fin 5) : ℝ :=
+  if h : r = c.rDom e then 1
+  else y (Sum.inr (Sum.inl ⟨e, ⟨r, h⟩⟩))
+
+private def paramN {d m : ℕ} (c : DiscreteConfig d m)
+    (y : ParamIdx c.I.1 c.rDom c.σ → ℝ) (e : Pairs6) (j : Fin d) : ℝ :=
+  ∑ r : Fin 5, paramC c y e r * paramU c y r j
+
+private def paramP0 {d m : ℕ} (c : DiscreteConfig d m)
+    (y : ParamIdx c.I.1 c.rDom c.σ → ℝ) (a : Fin m) (j : Fin d) : ℝ :=
+  if h : j = c.I.1 (c.rDom (c.σ a)) then 0
+  else y (Sum.inr (Sum.inr ⟨a, ⟨j, h⟩⟩))
+
+private def paramMap {d m : ℕ} (c : DiscreteConfig d m)
+    (y : ParamIdx c.I.1 c.rDom c.σ → ℝ) : Fin (m * d) → ℝ :=
+  fun k =>
+    let p := finProdFinEquiv.symm k
+    if p.2 = c.I.1 (c.rDom (c.σ p.1)) then
+      - ∑ j : Fin d, paramN c y (c.σ p.1) j * paramP0 c y p.1 j
+    else
+      paramP0 c y p.1 p.2
+
+private lemma differentiable_paramMap {d m : ℕ} (c : DiscreteConfig d m) :
+    Differentiable ℝ (paramMap c) := by
+  have hu : ∀ r j, Differentiable ℝ fun y => paramU c y r j := fun r j => by
+    dsimp [paramU]
+    split_ifs
+    · exact differentiable_const 1
+    · exact differentiable_const 0
+    · exact differentiable_apply _
+  have hc : ∀ e r, Differentiable ℝ fun y => paramC c y e r := fun e r => by
+    dsimp [paramC]
+    split_ifs
+    · exact differentiable_const 1
+    · exact differentiable_apply _
+  have hn : ∀ e j, Differentiable ℝ fun y => paramN c y e j := fun e j =>
+    Differentiable.fun_sum fun r _ => (hc e r).mul (hu r j)
+  have hp0 : ∀ a j, Differentiable ℝ fun y => paramP0 c y a j := fun a j => by
+    dsimp [paramP0]
+    split_ifs
+    · exact differentiable_const 0
+    · exact differentiable_apply _
+  refine differentiable_pi.mpr fun k => ?_
+  dsimp [paramMap]
+  split_ifs
+  · exact (Differentiable.fun_sum fun j _ => (hn _ j).mul (hp0 _ j)).neg
+  · exact hp0 _ _
+
+private lemma card_paramIdx_lt {d : ℕ} (hd : 5 ≤ d) (c : DiscreteConfig d (5 * d + 36)) :
+    Fintype.card (ParamIdx c.I.1 c.rDom c.σ) < (5 * d + 36) * d := by
+  let m := 5 * d + 36
+  have h1 : Fintype.card {j : Fin d // ∀ r : Fin 5, c.I.1 r ≠ j} = d - 5 := by
+    let sRest : Finset (Fin d) := Finset.univ \ Finset.univ.image c.I.1
+    have heq : {j : Fin d // ∀ r : Fin 5, c.I.1 r ≠ j} ≃ {j : Fin d // j ∈ sRest} :=
+      Equiv.subtypeEquivRight fun j => by
+        simp [sRest, Finset.mem_sdiff, Finset.mem_image]
+    rw [Fintype.card_congr heq, Fintype.card_coe]
+    have hsub : Finset.univ.image c.I.1 ⊆ (Finset.univ : Finset (Fin d)) :=
+      Finset.subset_univ _
+    dsimp [sRest]
+    rw [Finset.card_sdiff, Finset.inter_eq_left.mpr hsub, Finset.card_univ, Fintype.card_fin,
+      Finset.card_image_of_injective _ c.I.2, Finset.card_univ, Fintype.card_fin]
+  have h2 : ∀ e : Pairs6, Fintype.card {r : Fin 5 // r ≠ c.rDom e} = 4 := fun e => by
+    have heq : {r : Fin 5 // r ≠ c.rDom e} ≃
+        {r : Fin 5 // r ∈ Finset.univ.erase (c.rDom e)} :=
+      Equiv.subtypeEquivRight fun r => by simp [Finset.mem_erase]
+    rw [Fintype.card_congr heq, Fintype.card_coe, Finset.card_erase_of_mem (Finset.mem_univ _),
+      Finset.card_univ, Fintype.card_fin]
+  have h3 : ∀ a : Fin m, Fintype.card {j : Fin d // j ≠ c.I.1 (c.rDom (c.σ a))} = d - 1 :=
+    fun a => by
+    have heq : {j : Fin d // j ≠ c.I.1 (c.rDom (c.σ a))} ≃
+        {j : Fin d // j ∈ Finset.univ.erase (c.I.1 (c.rDom (c.σ a)))} :=
+      Equiv.subtypeEquivRight fun j => by simp [Finset.mem_erase]
+    rw [Fintype.card_congr heq, Fintype.card_coe, Finset.card_erase_of_mem (Finset.mem_univ _),
+      Finset.card_univ, Fintype.card_fin]
+  have hcard :
+      Fintype.card (ParamIdx c.I.1 c.rDom c.σ) = 5 * (d - 5) + 15 * 4 + m * (d - 1) := by
+    simp only [ParamIdx, Fintype.card_sum, Fintype.card_prod, Fintype.card_sigma,
+      Fintype.card_fin, h1, h2, h3, Finset.sum_const, Finset.card_univ, smul_eq_mul,
+      card_pairs6]
+    ring
+  rw [hcard]
+  have hm_prod : m * d = m * (d - 1) + m := by
+    conv_lhs => rw [show d = (d - 1) + 1 by omega]
+    ring
+  rw [hm_prod]
+  set A := m * (d - 1)
+  change 5 * (d - 5) + 15 * 4 + A < A + (5 * d + 36)
+  omega
+
+private lemma volume_range_eq_zero_of_card_lt {N : ℕ} (hN : 0 < N)
+    {γ : Type*} [Fintype γ] (hcard : Fintype.card γ < N)
+    {Ψ : (γ → ℝ) → (Fin N → ℝ)} (hΨ : Differentiable ℝ Ψ) :
+    (volume : Measure (Fin N → ℝ)) (Set.range Ψ) = 0 := by
+  let k0 : Fin N := ⟨0, hN⟩
+  let H₀ : Submodule ℝ (Fin N → ℝ) := LinearMap.ker (LinearMap.proj k0)
+  have hH₀_ne_top : H₀ ≠ ⊤ := by
+    intro htop
+    have hmem : Pi.single (M := fun _ : Fin N => ℝ) k0 (1 : ℝ) ∈ H₀ := htop ▸ Submodule.mem_top
+    have h0 : (Pi.single (M := fun _ : Fin N => ℝ) k0 (1 : ℝ)) k0 = 0 := hmem
+    simp at h0
+  have hH₀_vol : (volume : Measure (Fin N → ℝ)) (H₀ : Set (Fin N → ℝ)) = 0 :=
+    Measure.addHaar_submodule volume H₀ hH₀_ne_top
+  let e : γ ≃ Fin (Fintype.card γ) := Fintype.equivFin γ
+  let ι : γ → Fin N := fun g => ⟨(e g).1 + 1, by have := (e g).isLt; omega⟩
+  let L : (Fin N → ℝ) → (γ → ℝ) := fun z g => z (ι g)
+  have hL_diff : Differentiable ℝ L := differentiable_pi.mpr fun g => differentiable_apply (ι g)
+  let M : (γ → ℝ) → (Fin N → ℝ) := fun y k =>
+    if hk : k.1 = 0 then 0
+    else if hlt : k.1 - 1 < Fintype.card γ then y (e.symm ⟨k.1 - 1, hlt⟩)
+    else 0
+  have hM_mem : ∀ y, M y ∈ (H₀ : Set (Fin N → ℝ)) := fun y => by
+    change M y k0 = 0
+    simp [M, k0]
+  have hLM : ∀ y, L (M y) = y := fun y => by
+    funext g
+    dsimp [L, M]
+    have hlt : (ι g).1 - 1 < Fintype.card γ := by simp [ι]
+    simp only [↓reduceDIte, hlt]
+    have heq : (⟨(ι g).1 - 1, hlt⟩ : Fin (Fintype.card γ)) = e g := by
+      ext; simp [ι]
+    rw [heq, e.symm_apply_apply]
+  have hsub : Set.range Ψ ⊆ (Ψ ∘ L) '' (H₀ : Set (Fin N → ℝ)) := by
+    rintro _ ⟨y, rfl⟩
+    refine ⟨M y, hM_mem y, ?_⟩
+    simp [Function.comp_apply, hLM y]
+  have himg_zero : (volume : Measure (Fin N → ℝ)) ((Ψ ∘ L) '' (H₀ : Set (Fin N → ℝ))) = 0 :=
+    addHaar_image_eq_zero_of_differentiableOn_of_addHaar_eq_zero
+      (volume : Measure (Fin N → ℝ)) (hΨ.comp hL_diff).differentiableOn hH₀_vol
+  exact measure_mono_null hsub himg_zero
+
+private lemma mem_range_paramMap_of_not_blocking {d m : ℕ} (hd : 5 ≤ d)
+    (z : Fin (m * d) → ℝ)
+    (hz_ball : ∀ a : Fin m, evalPoints z a ∈ Metric.ball (0 : Ambient d) 1)
+    (hnot_block : ¬ IsBlocking (evalPoints z)) :
+    ∃ c : DiscreteConfig d m, z ∈ Set.range (paramMap c) := by
+  classical
+  let p : Fin m → Ambient d := evalPoints z
+  dsimp [IsBlocking] at hnot_block
+  push Not at hnot_block
+  obtain ⟨C, hcov, hdisj, h0, hno_int⟩ := hnot_block
+  let S := nonEmptyIntParts C
+  obtain ⟨n, I, u, hI_inj, hu_rref, _hnii, hnsym, _hnnotS, hnne, hnsep, hcoef⟩ :=
+    separating_normals_in_rref_span hd C hcov hdisj h0
+  have hex_rDom : ∀ e : Pairs6, ∃ r : Fin 5,
+      e.1.1 ∈ S → e.1.2 ∈ S → n e.1.1 e.1.2 (I r) ≠ 0 := by
+    intro e
+    by_cases hmem : e.1.1 ∈ S ∧ e.1.2 ∈ S
+    · have hne0 : n e.1.1 e.1.2 ≠ 0 := hnne e.1.1 hmem.1 e.1.2 hmem.2 e.2.ne
+      by_contra hall
+      push Not at hall
+      have hzero : n e.1.1 e.1.2 = 0 := by
+        apply PiLp.ext
+        intro j
+        rw [hcoef e.1.1 e.1.2 j]
+        have hsum0 : (∑ r : Fin 5, n e.1.1 e.1.2 (I r) * u r j) = 0 :=
+          Finset.sum_eq_zero fun r _ => by rw [(hall r).2.2, zero_mul]
+        exact hsum0
+      exact hne0 hzero
+    · refine ⟨0, fun h1 h2 => False.elim (hmem ⟨h1, h2⟩)⟩
+  choose rDom hrDom_spec using hex_rDom
+  have hex_sig : ∀ a : Fin m,
+      ∃ e : Pairs6, e.1.1 ∈ S ∧ e.1.2 ∈ S ∧ ⟪n e.1.1 e.1.2, p a⟫_ℝ = 0 := by
+    intro a
+    obtain ⟨i, hiS, j, hjS, hij, hzero⟩ :=
+      skeleton_in_separating_hyperplanes C hcov n hnsep hnsym (hz_ball a)
+        (fun k hk => hno_int k a hk)
+    exact ⟨⟨(i, j), hij⟩, hiS, hjS, hzero⟩
+  choose σ hσ1 hσ2 hσ_zero using hex_sig
+  let cfg : DiscreteConfig d m := ⟨⟨I, hI_inj⟩, rDom, σ⟩
+  let cCoef : Pairs6 → Fin 5 → ℝ := fun e r =>
+    if e.1.1 ∈ S ∧ e.1.2 ∈ S then
+      (n e.1.1 e.1.2 (I (rDom e)))⁻¹ * n e.1.1 e.1.2 (I r)
+    else if r = rDom e then 1 else 0
+  have hc_dom : ∀ e : Pairs6, cCoef e (rDom e) = 1 := fun e => by
+    dsimp [cCoef]
+    by_cases h : e.1.1 ∈ S ∧ e.1.2 ∈ S
+    · simp [h, inv_mul_cancel₀ (hrDom_spec e h.1 h.2)]
+    · simp [h]
+  let y : ParamIdx cfg.I.1 cfg.rDom cfg.σ → ℝ
+    | Sum.inl (r, j) => u r j.1
+    | Sum.inr (Sum.inl ⟨e, r⟩) => cCoef e r.1
+    | Sum.inr (Sum.inr ⟨a, j⟩) => p a j.1
+  have hy_U : ∀ r j, paramU cfg y r j = u r j := fun r j => by
+    dsimp [paramU, cfg]
+    split_ifs with h1 h2
+    · rw [← h1, hu_rref r r]; simp
+    · obtain ⟨s, hs⟩ := h2
+      have hrs : r ≠ s := fun h => h1 (h ▸ hs)
+      rw [← hs, hu_rref r s]; simp [hrs]
+    · rfl
+  have hy_C : ∀ e r, paramC cfg y e r = cCoef e r := fun e r => by
+    dsimp [paramC, cfg]
+    split_ifs with h
+    · rw [h, hc_dom e]
+    · rfl
+  have hy_N_perp : ∀ a : Fin m, ∑ j : Fin d, paramN cfg y (σ a) j * p a j = 0 := fun a => by
+    let e := σ a
+    have h1 : e.1.1 ∈ S := hσ1 a
+    have h2 : e.1.2 ∈ S := hσ2 a
+    have hN_eq : ∀ j : Fin d, paramN cfg y e j =
+        (n e.1.1 e.1.2 (I (rDom e)))⁻¹ * n e.1.1 e.1.2 j := fun j => by
+      dsimp [paramN]
+      have hc_eq : ∀ r : Fin 5, paramC cfg y e r =
+          (n e.1.1 e.1.2 (I (rDom e)))⁻¹ * n e.1.1 e.1.2 (I r) := fun r => by
+        rw [hy_C e r]
+        dsimp [cCoef]
+        simp only [h1, h2, and_self, ↓reduceIte]
+      simp_rw [hc_eq, hy_U]
+      rw [hcoef e.1.1 e.1.2 j, Finset.mul_sum]
+      refine Finset.sum_congr rfl fun r _ => by ring
+    have hN_mul : ∀ j : Fin d, paramN cfg y (σ a) j * p a j =
+        (n e.1.1 e.1.2 (I (rDom e)))⁻¹ * (n e.1.1 e.1.2 j * p a j) := fun j => by
+      rw [show σ a = e from rfl, hN_eq j, mul_assoc]
+    simp_rw [hN_mul]
+    rw [← Finset.mul_sum]
+    have hdot : ∑ j : Fin d, n e.1.1 e.1.2 j * p a j = 0 := by
+      simpa only [PiLp.inner_apply, real_inner_eq_re_inner, RCLike.inner_apply,
+        conj_trivial, mul_comm] using hσ_zero a
+    rw [hdot, mul_zero]
+  have hy_N_piv : ∀ e : Pairs6, paramN cfg y e (I (rDom e)) = 1 := fun e => by
+    dsimp [paramN]
+    simp_rw [hy_C, hy_U, hu_rref]
+    rw [Finset.sum_eq_single (rDom e)]
+    · simp [hc_dom e]
+    · intro r _ hr; simp [hr]
+    · intro hr; exact False.elim (hr (Finset.mem_univ _))
+  refine ⟨cfg, y, ?_⟩
+  funext k
+  obtain ⟨⟨a, j⟩, rfl⟩ := finProdFinEquiv.surjective k
+  have hp_eq : p a j = z (finProdFinEquiv (a, j)) := rfl
+  dsimp [paramMap]
+  rw [finProdFinEquiv.symm_apply_apply]
+  split_ifs with hj
+  · have hj_eq : j = I (rDom (σ a)) := hj
+    have hp0_eq : ∀ k : Fin d, paramP0 cfg y a k =
+        if k = I (rDom (σ a)) then 0 else p a k := fun k => by
+      dsimp [paramP0, cfg]
+      split_ifs <;> rfl
+    simp_rw [hp0_eq]
+    have hsplit : ∑ k : Fin d, paramN cfg y (σ a) k * (if k = I (rDom (σ a)) then 0 else p a k) =
+        (∑ k ∈ Finset.univ.erase (I (rDom (σ a))), paramN cfg y (σ a) k * p a k) := by
+      rw [← Finset.add_sum_erase Finset.univ _ (Finset.mem_univ (I (rDom (σ a))))]
+      simp only [↓reduceIte, mul_zero, zero_add]
+      refine Finset.sum_congr rfl fun k hk => ?_
+      simp [(Finset.mem_erase.mp hk).1]
+    have hsplit_full : ∑ k : Fin d, paramN cfg y (σ a) k * p a k =
+        paramN cfg y (σ a) (I (rDom (σ a))) * p a (I (rDom (σ a))) +
+          ∑ k ∈ Finset.univ.erase (I (rDom (σ a))), paramN cfg y (σ a) k * p a k :=
+      (Finset.add_sum_erase Finset.univ (fun k => paramN cfg y (σ a) k * p a k)
+        (Finset.mem_univ (I (rDom (σ a))))).symm
+    rw [hy_N_perp a, hy_N_piv (σ a), one_mul] at hsplit_full
+    have hpj : p a (I (rDom (σ a))) = p a j := by rw [← hj_eq]
+    change - ∑ k : Fin d, paramN cfg y (σ a) k * (if k = I (rDom (σ a)) then 0 else p a k) =
+      z (finProdFinEquiv (a, j))
+    rw [hsplit]
+    linarith [hsplit_full, hpj, hp_eq]
+  · have hj_ne : j ≠ I (rDom (σ a)) := hj
+    dsimp [paramP0, cfg, y]
+    simp [hj_ne, hp_eq]
+
+/-- Unconditional existence of `5 * d + 36` central blocking points in `unitBall d` (`d ≥ 5`). -/
+theorem exists_isBlocking (d : ℕ) (hd : 5 ≤ d) :
+    ∃ p : Fin (5 * d + 36) → Ambient d, IsBlocking p := by
+  let m := 5 * d + 36
+  have hmd : 0 < m * d := by positivity
+  let bad : Set (Fin (m * d) → ℝ) := ⋃ c : DiscreteConfig d m, Set.range (paramMap c)
+  have hbad_vol : (volume : Measure (Fin (m * d) → ℝ)) bad = 0 := by
+    refine measure_iUnion_null fun c => ?_
+    exact volume_range_eq_zero_of_card_lt hmd (card_paramIdx_lt hd c) (differentiable_paramMap c)
+  let good : Set (Fin (m * d) → ℝ) :=
+    {z | ∀ a : Fin m, evalPoints z a ∈ Metric.ball (0 : Ambient d) 1}
+  have hgood_open : IsOpen good := by
+    have heq : good = ⋂ a : Fin m, (fun z => evalPoints z a) ⁻¹' Metric.ball (0 : Ambient d) 1 := by
+      ext z; simp [good]
+    rw [heq]
+    refine isOpen_iInter_of_finite fun a => Metric.isOpen_ball.preimage ?_
+    exact (continuous_apply a).comp continuous_evalPoints
+  have hzero_good : (0 : Fin (m * d) → ℝ) ∈ good := fun a => by
+    have hev : evalPoints (0 : Fin (m * d) → ℝ) a = 0 := by
+      apply PiLp.ext
+      intro j
+      rfl
+    rw [hev]
+    exact Metric.mem_ball_self zero_lt_one
+  have hgood_pos : 0 < (volume : Measure (Fin (m * d) → ℝ)) good :=
+    hgood_open.measure_pos volume ⟨0, hzero_good⟩
+  have hnot_sub : ¬ good ⊆ bad := fun hsub => by
+    have hle : (volume : Measure (Fin (m * d) → ℝ)) good ≤ volume bad := measure_mono hsub
+    rw [hbad_vol] at hle
+    exact (lt_of_lt_of_le hgood_pos hle).ne' rfl
+  obtain ⟨z, hz_good, hz_not_bad⟩ := Set.not_subset.mp hnot_sub
+  refine ⟨evalPoints z, ?_⟩
+  by_contra hnot_block
+  obtain ⟨c, hc⟩ := mem_range_paramMap_of_not_blocking hd z hz_good hnot_block
+  exact hz_not_bad (Set.mem_iUnion.mpr ⟨c, hc⟩)
+
 private theorem convex_partition_from_base {d₀ d : ℕ} (hd₀ : 2 ≤ d₀) (hd : d₀ ≤ d)
     {g₀ : (Fin (5 * d₀) → ℝ) → (Fin (d₀ - 2) → ℝ)} (hg₀ : IsAlmostSixEmbedding g₀)
     {p : Fin (5 * d) → Ambient d} (hp : IsBlocking p) :
@@ -952,11 +1927,29 @@ private theorem convex_partition_from_base {d₀ d : ℕ} (hd₀ : 2 ≤ d₀) (
     (by omega : (d₀ - 2) + (d - d₀) = d - 2) hg₁
   exact convex_partition_of_embedding_and_blocking (by omega) hg hp
 
-/-- **Theorem B**: In every dimension `d ≥ 24`, given `5 * d - 4` central blocking markers `p`,
-derives `eta` via Blaschke compactness (`exists_eta_of_isBlocking`), pads Theorem A `d - 8` times
-to `Δ^(5d-5) → ℝ^(d-2)`, and constructs `d - 1` continuous functionals on convex bodies and an
-absolutely continuous probability measure without equalizing convex six-partitions. -/
-theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
+/-- **Theorem B (completely unconditional, `d ≥ 288`)**: In every dimension `d ≥ 288`,
+obtains `5 * d + 36` central blocking markers unconditionally via `exists_isBlocking`,
+derives `eta` via Blaschke compactness (`exists_eta_of_isBlocking`), constructs an
+unconditional almost six-embedding `Δ^(5d+35) → ℝ^(d-2)` (`padded_tverberg_ge_288`), and
+produces `d - 1` continuous functionals on convex bodies and an absolutely continuous
+probability measure without equalizing convex six-partitions. -/
+theorem convex_partition_counterexample (d : ℕ) (hd : 288 ≤ d) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) := by
+  obtain ⟨g, hg⟩ := padded_tverberg_ge_288 d hd
+  obtain ⟨p, hp⟩ := exists_isBlocking d (by omega)
+  exact convex_partition_of_embedding_and_blocking (by omega) hg hp
+
+/-- **`d ≥ 24` reduction with `5 * d - 4` central blocking markers**: pads Theorem A
+`d - 8` times to `Δ^(5d-5) → ℝ^(d-2)` and transfers any central blocking set `p` via
+Blaschke compactness (`exists_eta_of_isBlocking`) and `inwardDist`. -/
+theorem convex_partition_counterexample_ge_24 (d : ℕ) (hd : 24 ≤ d)
     (p : Fin (5 * d - 4) → Ambient d) (hp : IsBlocking p) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧

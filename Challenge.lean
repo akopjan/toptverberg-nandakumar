@@ -12,10 +12,10 @@ Arseniy Akopyan
 * Theorem A (`AkopyanSixfold.tverberg_counterexample`):
   An almost six-embedding of the 35-simplex `Δ³⁵` into `ℝ⁶`.
 * Theorem B (`AkopyanSixfold.convex_partition_counterexample`):
-  In every dimension `d ≥ 24`, given `5 * d - 4` central blocking markers `p`
-  (`IsBlocking p`), there exist `d - 1` continuous functionals on convex bodies
-  and an absolutely continuous probability measure such that no convex six-partition
-  of the unit ball into six equal-measure parts equalizes all these functionals.
+  Unconditionally in every dimension `d ≥ 288`, there exist `d - 1` continuous
+  functionals on convex bodies and an absolutely continuous probability measure
+  such that no convex six-partition of the unit ball into six equal-measure
+  parts equalizes all these functionals.
 -/
 
 set_option autoImplicit false
@@ -70,24 +70,11 @@ def IsSixPartition {d : ℕ} (C : Fin 6 → Body d) : Prop :=
     Disjoint (interior (C i : Set (Ambient d)))
              (interior (C j : Set (Ambient d)))
 
-/-- `p` blocks central six-partitions if every six-partition of `unitBall d`
-(possibly with degenerate parts) whose parts all contain the origin `0` has some
-marker `p a` in the interior of some part. -/
-def IsBlocking {d m : ℕ} (p : Fin m → Ambient d) : Prop :=
-  ∀ C : Fin 6 → Body d,
-    unitBall d = (⋃ i, (C i : Set (Ambient d))) →
-    (∀ i j, i ≠ j →
-      Disjoint (interior (C i : Set (Ambient d)))
-               (interior (C j : Set (Ambient d)))) →
-    (∀ i, (0 : Ambient d) ∈ (C i : Set (Ambient d))) →
-    ∃ i a, p a ∈ interior (C i : Set (Ambient d))
-
-/-- **Theorem B**: In every dimension `d ≥ 24`, there exist `d - 1` continuous
-functionals on convex bodies and an absolutely continuous probability measure
-such that no convex six-partition of the unit ball into six parts of equal
-measure equalizes all these functionals. -/
-theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
-    (p : Fin (5 * d - 4) → Ambient d) (hp : IsBlocking p) :
+/-- **Theorem B**: Unconditionally in every dimension `d ≥ 288`, there exist
+`d - 1` continuous functionals on convex bodies and an absolutely continuous
+probability measure such that no convex six-partition of the unit ball into
+six parts of equal measure equalizes all these functionals. -/
+theorem convex_partition_counterexample (d : ℕ) (hd : 288 ≤ d) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧

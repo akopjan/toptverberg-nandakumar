@@ -196,30 +196,31 @@ are proved completely without \texttt{sorry} in \texttt{Solution.lean} on Lean~4
 axioms \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
 Theorem~\ref{thm:A} is verified unconditionally via the scalar height-table
 reduction and piecewise-linear surgery in \texttt{RequestProject/}, and
-extended unconditionally to $\Delta^{5d+5}\to\R^d$ for all $d\ge6$ and to the
-fivefold join $\Delta^{179}\to\R^{34}$ ($\Delta^{5d-1}\to\R^{d-2}$ for $d\ge36$)
-via the general binary-join lemma in \texttt{Solution.lean}.
+extended unconditionally via the general binary-join lemma in
+\texttt{Solution.lean} to $\Delta^{5d+5}\to\R^d$ ($d\ge6$), the fivefold join
+$\Delta^{179}\to\R^{34}$ ($\Delta^{5d-1}\to\R^{d-2}$ for $d\ge36$), and the
+$(k+1)$-fold join (\texttt{kfold\_tverberg\_join}).
 \texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}
-formalizes Theorem~\ref{thm:B} in every dimension $d\ge24$ for an absolutely
-continuous probability measure conditionally only on a central blocking
-configuration of $5d-4$ markers (\texttt{IsBlocking p}, with neither
-Theorem~\ref{thm:C} nor $\eta$ as hypotheses): internally,
-\texttt{Solution.lean} proves the Blaschke selection theorem
+formalizes Theorem~\ref{thm:B} completely unconditionally in every dimension
+$d\ge288$ (with no external almost six-embedding, margin $\eta$, or
+blocking-point assumptions in \texttt{Challenge.lean}): \texttt{Solution.lean}
+proves the unconditional existence of $5d+36$ central blocking markers for all
+$d\ge5$ (\texttt{exists\_\allowbreak isBlocking}, via Hahn--Banach separating
+normals, normal rank $\le 5$ in Lemma~\ref{lem:rank}, Gaussian elimination to
+RREF, and Lebesgue-null differentiable parametrization), proves the Blaschke
+selection theorem
 (\texttt{blaschke\_\allowbreak isCompact\_\allowbreak subsets\_\allowbreak unitBall}),
 deduces the central-avoidance margin $\eta\in(0,1)$
 (\texttt{exists\_\allowbreak eta\_\allowbreak of\_\allowbreak isBlocking}, Lemma~\ref{lem:nearcentral}),
-proves the binary join and padding reduction
-(Lemma~\ref{lem:padding}), the $1$-Lipschitz
-Hausdorff-continuity and inward-distance transfer (Lemma~\ref{lem:transfer}), the
-concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), instantiates a
-normalized Lebesgue ball probability measure, and proves the \cite{AKS}-free
-$5d$-marker theorem \texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_36}
-for $d\ge36$, together with the conditional reductions
-\texttt{twofold\_\allowbreak seven\_\allowbreak color\_\allowbreak join} and
-\texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_18}.
-Neither Theorem~\ref{thm:C} nor the semialgebraic blocking
-construction of Theorem~\ref{thm:conedim} and Lemma~\ref{lem:blockers}
-is formalized in Lean.
+constructs an unconditional almost six-embedding $\Delta^{5d+35}\to\R^{d-2}$
+from a $41$-fold binary join of Theorem~\ref{thm:A} plus join-padding
+(Lemma~\ref{lem:padding}), proves $1$-Lipschitz Hausdorff-continuity and
+inward-distance transfer (Lemma~\ref{lem:transfer}), proves the
+concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), and instantiates
+a normalized Lebesgue ball probability measure. Additional conditional
+reductions matching the sharper parameter counts of Theorem~\ref{thm:C} and
+Theorem~\ref{thm:conedim} ($d\ge24$, $d\ge36$, and $d\ge18$) are also
+verified in \texttt{Solution.lean}.
 \end{sloppypar}
 
 \section{Height tables and their forbidden subspaces}\label{sec:tables}
@@ -1221,20 +1222,20 @@ degree balance, and piecewise-linear zero-cancellation surgery in
 and fivefold join $\Delta^{179}\to\R^{34}$ in \texttt{Solution.lean}.
 Theorem~\ref{thm:B}
 (\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample})
-is formalized in every dimension $d\ge24$ for an absolutely continuous
-probability measure conditionally only on a central blocking configuration of
-$5d-4$ markers (\texttt{IsBlocking p}): \texttt{Solution.lean} proves the
-Blaschke selection theorem, deduces the central-avoidance margin
-(Lemma~\ref{lem:nearcentral}), proves the binary join and join-padding reduction
-(Lemma~\ref{lem:padding}), the $1$-Lipschitz Hausdorff-continuity and transfer
-of the inward-distance body functionals (Lemma~\ref{lem:transfer}), the
-concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), instantiates a
-normalized Lebesgue ball witness, and provides the \cite{AKS}-free $5d$-marker
-theorem \texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_36}
-for $d\ge36$, as well as \texttt{twofold\_\allowbreak seven\_\allowbreak color\_\allowbreak join}
-and \texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_18},
-without formalizing Theorem~\ref{thm:C} or the semialgebraic blocking
-construction of Theorem~\ref{thm:conedim} and Lemma~\ref{lem:blockers}.
+is formalized completely unconditionally in every dimension $d\ge288$ (with no
+external almost six-embedding, margin $\eta$, or blocking-point assumptions in
+\texttt{Challenge.lean}): \texttt{Solution.lean} proves the unconditional
+existence of $5d+36$ central blocking points (\texttt{exists\_isBlocking}, via
+Hahn--Banach separating normals, Lemma~\ref{lem:rank}, Gaussian elimination to
+RREF, and Lebesgue-null differentiable parametrization), proves the Blaschke
+selection theorem and Lemma~\ref{lem:nearcentral}, combines a $41$-fold binary
+join of Theorem~\ref{thm:A} with join-padding (Lemma~\ref{lem:padding}) to
+obtain $\Delta^{5d+35}\to\R^{d-2}$ without~\cite{AKS}, and proves
+Hausdorff-continuous inward-distance transfer (Lemma~\ref{lem:transfer}) and
+concentrated-measure fairness (Lemma~\ref{lem:mass}) with a normalized
+Lebesgue ball witness. For $d\ge24$, $d\ge36$, and $d\ge18$, conditional
+reductions matching the sharper parameter bounds of Theorems~\ref{thm:C}
+and~\ref{thm:conedim} are also included in \texttt{Solution.lean}.
 Kernel axiom inspection confirms that both declared theorems depend exclusively
 on \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
 \end{sloppypar}
