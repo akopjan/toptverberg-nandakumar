@@ -12,7 +12,8 @@ Arseniy Akopyan
 * Theorem A (`AkopyanSixfold.tverberg_counterexample`):
   An almost six-embedding of the 35-simplex `Δ³⁵` into `ℝ⁶`.
 * Theorem B (`AkopyanSixfold.convex_partition_counterexample`):
-  In every dimension `d ≥ 24`, given blocking markers `(p, eta)` (`IsBlocking p eta`),
+  In every dimension `d ≥ 24`, given an almost six-embedding `g₀ : Δ¹¹⁹ → ℝ²²`
+  (Theorem C of the paper) and `5 * d` blocking markers `(p, eta)` (`IsBlocking p eta`),
   there exist `d - 1` continuous functionals on convex bodies and an absolutely
   continuous probability measure such that no convex six-partition of the unit ball
   into six equal-measure parts equalizes all these functionals.
@@ -84,7 +85,8 @@ functionals on convex bodies and an absolutely continuous probability measure
 such that no convex six-partition of the unit ball into six parts of equal
 measure equalizes all these functionals. -/
 theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
-    (p : Fin (5 * d - 4) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    (g₀ : (Fin 120 → ℝ) → (Fin 22 → ℝ)) (hg₀ : IsAlmostSixEmbedding g₀)
+    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧

@@ -15,12 +15,19 @@ Matches `Challenge.lean` via `comparator.json` without importing `Challenge.lean
   An almost six-embedding `Δ³⁵ → ℝ⁶`, proved via the height-table construction
   `Tverberg6R.tverbergCounterexample_of_heightExtension Tverberg6R.heightExtension`.
 * `AkopyanSixfold.convex_partition_counterexample` (Theorem B):
-  In every dimension `d ≥ 24`, given `5 * d - 4` blocking markers for `eta`-central
-  six-partitions, iterates join-padding (`d - 8` times) from Theorem A to produce an
-  almost six-embedding `g : Δ^(5d-5) → ℝ^(d-2)`, transfers it via the Hausdorff-continuous
-  inward-distance functional `inwardDist` to `d - 1` continuous body functionals `Phi`,
-  and proves that no fair convex six-partition equalizes `Phi` for any `eta`-concentrated
-  absolutely continuous measure (nor for a normalized Lebesgue ball restriction).
+  In every dimension `d ≥ 24`, given `g₀ : Δ¹¹⁹ → ℝ²²` (Theorem C) and `5 * d` blocking
+  markers `(p, eta)` for `eta`-central six-partitions, iterates join-padding (`d - 24` times)
+  to produce an almost six-embedding `g : Δ^(5d-1) → ℝ^(d-2)`, transfers it via the
+  Hausdorff-continuous inward-distance functional `inwardDist` to `d - 1` continuous body
+  functionals `Phi`, and proves that no fair convex six-partition equalizes `Phi` for any
+  `eta`-concentrated absolutely continuous measure (nor for a normalized Lebesgue ball witness).
+* Additional results in `Solution.lean`:
+  `join_almostSixEmbedding`, `tverberg_counterexample_ge_six` (`d ≥ 6`), `fivefold_tverberg_join`
+  (`Δ¹⁷⁹ → ℝ³⁴`), `padded_tverberg_ge_36` (`d ≥ 36`), `twofold_seven_color_join`
+  (`Δ⁴¹ → ℝ⁷` implies `Δ⁸³ → ℝ¹⁵`), `convex_partition_of_embedding_and_blocking`,
+  `convex_partition_counterexample_ge_36` (`d ≥ 36`, without Theorem C), and
+  `convex_partition_counterexample_ge_18` (`d ≥ 18`, conditional on `Δ⁸⁹ → ℝ¹⁶`
+  and `5d` blocking markers).
 -/
 
 set_option autoImplicit false
@@ -86,140 +93,207 @@ def IsBlocking {d m : ℕ} (p : Fin m → Ambient d) (eta : ℝ) : Prop :=
     (∀ i, ∃ x ∈ (C i : Set (Ambient d)), ‖x‖ ≤ eta) →
     ∃ i a, p a ∈ interior (C i : Set (Ambient d))
 
-/-! ### Helper 1: Join-padding of almost six-embeddings (Lemma 3.3) -/
+/-! ### Helper 1: Perspective continuity, binary joins, and join-padding -/
 
-private lemma padMap_headSum_nonneg {n : ℕ} {x : Fin (n + 5) → ℝ}
-    (hx : x ∈ simplex (n + 5)) :
-    0 ≤ ∑ v : Fin n, x (Fin.castAdd 5 v) :=
-  Finset.sum_nonneg fun _ _ => hx.1 _
-
-private lemma padMap_proj_mem_simplex {n : ℕ} (hn : 0 < n)
-    {x : Fin (n + 5) → ℝ} (hx : x ∈ simplex (n + 5)) :
-    (let t := ∑ v : Fin n, x (Fin.castAdd 5 v)
-     if t = 0 then Pi.single ⟨0, hn⟩ (1 : ℝ) else fun v => x (Fin.castAdd 5 v) / t) ∈
-      simplex n := by
-  dsimp only
-  set t := ∑ v : Fin n, x (Fin.castAdd 5 v)
-  by_cases ht : t = 0
-  · simp only [ht, ↓reduceIte]
-    refine ⟨fun v => ?_, by simp⟩
-    by_cases hv : v = ⟨0, hn⟩ <;> simp [hv]
-  · simp only [ht, ↓reduceIte]
-    have ht_nonneg : 0 ≤ t := padMap_headSum_nonneg hx
-    refine ⟨fun v => div_nonneg (hx.1 _) ht_nonneg, ?_⟩
+private lemma continuousOn_perspective {X : Type*} [TopologicalSpace X]
+    {S : Set X} {n q : ℕ}
+    {w : X → Fin n → ℝ}
+    (hw_cont : ∀ v, ContinuousOn (fun x => w x v) S)
+    (hw_nonneg : ∀ x ∈ S, ∀ v, 0 ≤ w x v)
+    {g : (Fin n → ℝ) → (Fin q → ℝ)} (hg : ContinuousOn g (simplex n))
+    (j : Fin q) :
+    ContinuousOn
+      (fun x =>
+        let s := ∑ v, w x v
+        if s = 0 then 0 else s * g (fun v => w x v / s) j)
+      S := by
+  let s : X → ℝ := fun x => ∑ v, w x v
+  have hs_cont : ContinuousOn s S :=
+    continuousOn_finsetSum _ fun v _ => hw_cont v
+  have hs_nonneg : ∀ x ∈ S, 0 ≤ s x :=
+    fun x hx => Finset.sum_nonneg fun v _ => hw_nonneg x hx v
+  have h_simplex : ∀ x ∈ S, s x ≠ 0 → (fun v => w x v / s x) ∈ simplex n := by
+    intro x hx hsx
+    refine ⟨fun v => div_nonneg (hw_nonneg x hx v) (hs_nonneg x hx), ?_⟩
     rw [← Finset.sum_div]
-    exact div_self ht
-
-/-- Join-padding preserves almost six-embeddings (adding 5 vertices and 1 target coordinate). -/
-private lemma padding_almostSixEmbedding {n q : ℕ} (hn : 0 < n)
-    {g : (Fin n → ℝ) → (Fin q → ℝ)} (hg : IsAlmostSixEmbedding g) :
-    ∃ f : (Fin (n + 5) → ℝ) → (Fin (q + 1) → ℝ),
-      IsAlmostSixEmbedding f := by
-  let t : (Fin (n + 5) → ℝ) → ℝ := fun x => ∑ v : Fin n, x (Fin.castAdd 5 v)
-  let yProj : (Fin (n + 5) → ℝ) → Fin n → ℝ := fun x =>
-    if t x = 0 then Pi.single ⟨0, hn⟩ (1 : ℝ) else fun v => x (Fin.castAdd 5 v) / t x
-  let f : (Fin (n + 5) → ℝ) → (Fin (q + 1) → ℝ) := fun x =>
-    Fin.cons (t x) (fun j => t x * g (yProj x) j)
-  have ht_cont : Continuous t :=
-    continuous_finsetSum _ fun v _ => continuous_apply (Fin.castAdd 5 v)
+    exact div_self hsx
   have hcompact : IsCompact (simplex n) := isCompact_stdSimplex ℝ (Fin n)
-  obtain ⟨M₀, hM₀⟩ := hcompact.exists_bound_of_continuousOn hg.1
+  obtain ⟨M₀, hM₀⟩ := hcompact.exists_bound_of_continuousOn hg
   let M : ℝ := max M₀ 0
   have hM_nonneg : 0 ≤ M := le_max_right M₀ 0
-  have hbound : ∀ y ∈ simplex n, ∀ j : Fin q, |g y j| ≤ M := by
-    intro y hy j
-    have h1 : |g y j| ≤ ‖g y‖ := norm_le_pi_norm (g y) j
-    exact h1.trans ((hM₀ y hy).trans (le_max_left M₀ 0))
+  have hbound : ∀ y ∈ simplex n, |g y j| ≤ M := fun y hy =>
+    (norm_le_pi_norm (g y) j).trans ((hM₀ y hy).trans (le_max_left M₀ 0))
+  intro x₀ hx₀
+  by_cases hs₀ : s x₀ = 0
+  · change Filter.Tendsto
+      (fun x => if s x = 0 then (0 : ℝ) else s x * g (fun v => w x v / s x) j)
+      (𝓝[S] x₀) (𝓝 (if s x₀ = 0 then (0 : ℝ) else s x₀ * g (fun v => w x₀ v / s x₀) j))
+    simp only [hs₀, ↓reduceIte]
+    refine tendsto_zero_iff_norm_tendsto_zero.mpr ?_
+    refine squeeze_zero' (g := fun x => M * |s x|)
+      (Filter.Eventually.of_forall fun _ => norm_nonneg _) ?_ ?_
+    · filter_upwards [self_mem_nhdsWithin] with x hx
+      by_cases hsx : s x = 0
+      · simp [hsx]
+      · simp only [hsx, ↓reduceIte, Real.norm_eq_abs, abs_mul]
+        have hle := hbound _ (h_simplex x hx hsx)
+        calc
+          |s x| * |g (fun v => w x v / s x) j| ≤ |s x| * M := by gcongr
+          _ = M * |s x| := mul_comm _ _
+    · have htend : Filter.Tendsto (fun x => M * |s x|) (𝓝[S] x₀) (𝓝 (M * |s x₀|)) :=
+        (continuous_const.continuousWithinAt.mul
+          (continuous_abs.continuousAt.comp_continuousWithinAt (hs_cont x₀ hx₀))).tendsto
+      simpa [hs₀] using htend
+  · let yMap : X → Fin n → ℝ := fun x v => w x v / s x
+    have hyMap_tend : Filter.Tendsto yMap (𝓝[S] x₀) (𝓝 (yMap x₀)) :=
+      tendsto_pi_nhds.mpr fun v =>
+        ((hw_cont v x₀ hx₀).div (hs_cont x₀ hx₀) hs₀).tendsto
+    have hsnz : {x : X | s x ≠ 0} ∈ 𝓝[S] x₀ :=
+      (hs_cont x₀ hx₀).tendsto (isOpen_ne.mem_nhds hs₀)
+    have h_maps : Filter.Tendsto yMap (𝓝[S] x₀) (𝓝[simplex n] (yMap x₀)) := by
+      refine tendsto_nhdsWithin_iff.mpr ⟨hyMap_tend, ?_⟩
+      filter_upwards [self_mem_nhdsWithin, hsnz] with x hx hsx
+      exact h_simplex x hx hsx
+    have hg_at : ContinuousWithinAt (fun y => g y j) (simplex n) (yMap x₀) :=
+      (continuous_apply j).continuousAt.comp_continuousWithinAt
+        (hg (yMap x₀) (h_simplex x₀ hx₀ hs₀))
+    have h_prod : ContinuousWithinAt (fun x => s x * g (yMap x) j) S x₀ :=
+      (hs_cont x₀ hx₀).mul (hg_at.tendsto.comp h_maps)
+    refine h_prod.congr_of_eventuallyEq ?_ ?_
+    · filter_upwards [hsnz] with x hx
+      simp [s, hx, yMap]
+    · simp [s, hs₀, yMap]
+
+/-- The binary join `g₁ * g₂ : Δ^(m+n-1) → ℝ^(p+q+1)` of two almost six-embeddings is an
+almost six-embedding. -/
+theorem join_almostSixEmbedding {m n p q : ℕ}
+    {g₁ : (Fin m → ℝ) → (Fin p → ℝ)} {g₂ : (Fin n → ℝ) → (Fin q → ℝ)}
+    (hg₁ : IsAlmostSixEmbedding g₁) (hg₂ : IsAlmostSixEmbedding g₂) :
+    ∃ f : (Fin (m + n) → ℝ) → (Fin (p + q + 1) → ℝ),
+      IsAlmostSixEmbedding f := by
+  let w₁ : (Fin (m + n) → ℝ) → Fin m → ℝ := fun x v => x (Fin.castAdd n v)
+  let w₂ : (Fin (m + n) → ℝ) → Fin n → ℝ := fun x w => x (Fin.natAdd m w)
+  let t : (Fin (m + n) → ℝ) → ℝ := fun x => ∑ v : Fin m, w₁ x v
+  let s : (Fin (m + n) → ℝ) → ℝ := fun x => ∑ w : Fin n, w₂ x w
+  let f : (Fin (m + n) → ℝ) → (Fin (p + q + 1) → ℝ) := fun x k =>
+    if _hk0 : k = 0 then t x
+    else if hkp : k.1 - 1 < p then
+      if t x = 0 then 0 else t x * g₁ (fun v => w₁ x v / t x) ⟨k.1 - 1, hkp⟩
+    else
+      if s x = 0 then 0 else s x * g₂ (fun w => w₂ x w / s x) ⟨k.1 - 1 - p, by have := k.isLt; omega⟩
   refine ⟨f, ?_, ?_⟩
-  · refine continuousOn_pi.mpr fun k => Fin.cases ?_ ?_ k
-    · simpa [f] using ht_cont.continuousOn
-    · intro j x hx
-      by_cases htx : t x = 0
-      · have hfx0 : f x j.succ = 0 := by simp [f, htx]
-        change Filter.Tendsto (fun u => t u * g (yProj u) j)
-          (𝓝[simplex (n + 5)] x) (𝓝 (f x j.succ))
-        rw [hfx0]
-        refine tendsto_zero_iff_norm_tendsto_zero.mpr ?_
-        refine squeeze_zero' (g := fun u => M * |t u|)
-          (Filter.Eventually.of_forall fun _ => norm_nonneg _) ?_ ?_
-        · filter_upwards [self_mem_nhdsWithin] with u hu
-          change ‖t u * g (yProj u) j‖ ≤ M * |t u|
-          rw [Real.norm_eq_abs, abs_mul]
-          by_cases htu : t u = 0
-          · simp [htu]
-          · have hyu : yProj u ∈ simplex n := padMap_proj_mem_simplex hn hu
-            have hle : |g (yProj u) j| ≤ M := hbound _ hyu j
-            calc
-              |t u| * |g (yProj u) j| ≤ |t u| * M := by gcongr
-              _ = M * |t u| := mul_comm _ _
-        · have htend : Filter.Tendsto (fun u => M * |t u|)
-              (𝓝[simplex (n + 5)] x) (𝓝 (M * |t x|)) :=
-            ((continuous_const.mul (ht_cont.abs)).continuousWithinAt).tendsto
-          simpa [htx] using htend
-      · let yRaw : (Fin (n + 5) → ℝ) → Fin n → ℝ :=
-          fun u v => u (Fin.castAdd 5 v) / t u
-        have hyRaw_cont : ContinuousAt yRaw x := by
-          refine continuousAt_pi.mpr fun v => ?_
-          exact (continuous_apply _).continuousAt.div ht_cont.continuousAt htx
-        have hnhds : {u | t u ≠ 0} ∈ 𝓝 x :=
-          ht_cont.continuousAt.preimage_mem_nhds (isOpen_ne.mem_nhds htx)
-        have h_maps : Filter.Tendsto yRaw (𝓝[simplex (n + 5)] x) (𝓝[simplex n] (yRaw x)) := by
-          refine tendsto_nhdsWithin_iff.mpr ⟨hyRaw_cont.continuousWithinAt, ?_⟩
-          filter_upwards [self_mem_nhdsWithin, nhdsWithin_le_nhds hnhds] with u hu htu
-          have hyu : yProj u ∈ simplex n := padMap_proj_mem_simplex hn hu
-          simpa [yProj, htu, yRaw] using hyu
-        have hx_in : yRaw x ∈ simplex n := by
-          have hyx : yProj x ∈ simplex n := padMap_proj_mem_simplex hn hx
-          simpa [yProj, htx, yRaw] using hyx
-        have hg_at : ContinuousWithinAt (fun y => g y j) (simplex n) (yRaw x) :=
-          (continuous_apply j).continuousAt.comp_continuousWithinAt (hg.1 (yRaw x) hx_in)
-        have hcomp : ContinuousWithinAt (fun u => t u * g (yRaw u) j) (simplex (n + 5)) x :=
-          ht_cont.continuousWithinAt.mul (hg_at.tendsto.comp h_maps)
-        refine hcomp.congr_of_eventuallyEq ?_ ?_
-        · filter_upwards [nhdsWithin_le_nhds hnhds] with u htu
-          simp [f, yProj, htu, yRaw]
-        · simp [f, yProj, htx, yRaw]
+  · refine continuousOn_pi.mpr fun k => ?_
+    by_cases hk0 : k = 0
+    · have hfun : (fun x => f x k) = t := funext fun x => by simp [f, hk0]
+      rw [hfun]
+      exact (continuous_finsetSum Finset.univ fun v _ =>
+        continuous_apply (Fin.castAdd n v)).continuousOn
+    · by_cases hkp : k.1 - 1 < p
+      · have hfun :
+            (fun x => f x k) = fun x =>
+              let t' := ∑ v, w₁ x v
+              if t' = 0 then 0 else t' * g₁ (fun v => w₁ x v / t') ⟨k.1 - 1, hkp⟩ :=
+          funext fun x => by simp [f, hk0, hkp, t]
+        rw [hfun]
+        exact continuousOn_perspective (fun v => (continuous_apply _).continuousOn)
+          (fun _ hx v => hx.1 _) hg₁.1 ⟨k.1 - 1, hkp⟩
+      · have hfun :
+            (fun x => f x k) = fun x =>
+              let s' := ∑ w, w₂ x w
+              if s' = 0 then 0 else s' * g₂ (fun w => w₂ x w / s') ⟨k.1 - 1 - p, by have := k.isLt; omega⟩ :=
+          funext fun x => by simp [f, hk0, hkp, s]
+        rw [hfun]
+        exact continuousOn_perspective (fun w => (continuous_apply _).continuousOn)
+          (fun _ hx w => hx.1 _) hg₂.1 ⟨k.1 - 1 - p, by have := k.isLt; omega⟩
   · intro x hx hdisj
     by_contra h_all
     push Not at h_all
     have ht_eq : ∀ i, t (x i) = t (x 0) := fun i => by
       have h0 := congrFun (h_all i) 0
       simpa [f] using h0
+    have hts_sum : ∀ i, t (x i) + s (x i) = 1 := fun i => by
+      have hsum := (hx i).2
+      rw [Fin.sum_univ_add] at hsum
+      exact hsum
+    have hs_eq : ∀ i, s (x i) = s (x 0) := fun i => by
+      linarith [hts_sum i, hts_sum 0, ht_eq i]
     by_cases ht0 : t (x 0) = 0
-    · have hw_sum : ∀ i, (∑ w : Fin 5, x i (Fin.natAdd n w)) = 1 := fun i => by
-        have hsum := (hx i).2
-        rw [Fin.sum_univ_add] at hsum
-        have hhead : t (x i) = 0 := (ht_eq i).trans ht0
-        change t (x i) + ∑ w : Fin 5, x i (Fin.natAdd n w) = 1 at hsum
-        linarith
-      have hex_w : ∀ i, ∃ w : Fin 5, x i (Fin.natAdd n w) ≠ 0 := fun i => by
-        by_contra hzero
-        push Not at hzero
-        have hsum0 : (∑ w : Fin 5, x i (Fin.natAdd n w)) = 0 :=
-          Finset.sum_eq_zero fun w _ => hzero w
-        linarith [hw_sum i]
-      choose w hw using hex_w
-      obtain ⟨i, j, hij, hwij⟩ :=
-        Fintype.exists_ne_map_eq_of_card_lt w (by simp)
-      rcases hdisj i j hij (Fin.natAdd n (w i)) with hi0 | hj0
-      · exact hw i hi0
-      · rw [hwij] at hj0
-        exact hw j hj0
-    · have hti : ∀ i, t (x i) ≠ 0 := fun i => (ht_eq i).symm ▸ ht0
-      have hy_mem : ∀ i, yProj (x i) ∈ simplex n :=
-        fun i => padMap_proj_mem_simplex hn (hx i)
-      have hy_disj : DisjointSupports (fun i => yProj (x i)) := by
-        intro i j hij v
-        rcases hdisj i j hij (Fin.castAdd 5 v) with hi0 | hj0
-        · left; simp [yProj, hti i, hi0]
-        · right; simp [yProj, hti j, hj0]
-      obtain ⟨i, hi_ne⟩ := hg.2 (fun i => yProj (x i)) hy_mem hy_disj
+    · have hs0 : s (x 0) = 1 := by linarith [hts_sum 0, ht0]
+      have hsi_ne : ∀ i, s (x i) ≠ 0 := fun i => by
+        rw [hs_eq i, hs0]
+        norm_num
+      have hsi_nonneg : ∀ i, 0 ≤ s (x i) := fun i =>
+        Finset.sum_nonneg fun w _ => (hx i).1 _
+      let y : Fin 6 → Fin n → ℝ := fun i w => w₂ (x i) w / s (x i)
+      have hy_mem : ∀ i, y i ∈ simplex n := fun i =>
+        ⟨fun w => div_nonneg ((hx i).1 _) (hsi_nonneg i),
+          by rw [← Finset.sum_div]; exact div_self (hsi_ne i)⟩
+      have hy_disj : DisjointSupports y := fun i j hij w => by
+        rcases hdisj i j hij (Fin.natAdd m w) with hi0 | hj0
+        · left; simp [y, w₂, hi0]
+        · right; simp [y, w₂, hj0]
+      obtain ⟨i, hi_ne⟩ := hg₂.2 y hy_mem hy_disj
       apply hi_ne
       funext j
-      have hj_eq := congrFun (h_all i) j.succ
-      simp only [f, Fin.cons_succ] at hj_eq
-      rw [ht_eq i] at hj_eq
-      exact mul_left_cancel₀ ht0 hj_eq
+      let k : Fin (p + q + 1) := ⟨1 + p + j.1, by omega⟩
+      have hk0 : k ≠ 0 := by
+        intro h
+        have hv := congrArg Fin.val h
+        simp [k] at hv
+      have hkp : ¬ k.1 - 1 < p := by simp [k]; omega
+      have hksub : (⟨k.1 - 1 - p, by have := k.isLt; omega⟩ : Fin q) = j := by
+        ext; simp [k]; omega
+      have hcon := congrFun (h_all i) k
+      simp only [f, hk0, ↓reduceDIte, hkp, hs_eq i, hs0, one_ne_zero, ↓reduceIte, hksub] at hcon
+      simpa [y, hs_eq i, hs0] using hcon
+    · have hti_ne : ∀ i, t (x i) ≠ 0 := fun i => (ht_eq i).symm ▸ ht0
+      have hti_nonneg : ∀ i, 0 ≤ t (x i) := fun i =>
+        Finset.sum_nonneg fun v _ => (hx i).1 _
+      let y : Fin 6 → Fin m → ℝ := fun i v => w₁ (x i) v / t (x i)
+      have hy_mem : ∀ i, y i ∈ simplex m := fun i =>
+        ⟨fun v => div_nonneg ((hx i).1 _) (hti_nonneg i),
+          by rw [← Finset.sum_div]; exact div_self (hti_ne i)⟩
+      have hy_disj : DisjointSupports y := fun i j hij v => by
+        rcases hdisj i j hij (Fin.castAdd n v) with hi0 | hj0
+        · left; simp [y, w₁, hi0]
+        · right; simp [y, w₁, hj0]
+      obtain ⟨i, hi_ne⟩ := hg₁.2 y hy_mem hy_disj
+      apply hi_ne
+      funext j
+      let k : Fin (p + q + 1) := ⟨1 + j.1, by omega⟩
+      have hk0 : k ≠ 0 := by
+        intro h
+        have hv := congrArg Fin.val h
+        simp [k] at hv
+      have hkp : k.1 - 1 < p := by simp [k]
+      have hksub : (⟨k.1 - 1, hkp⟩ : Fin p) = j := by
+        ext; simp [k]
+      have hcon := congrFun (h_all i) k
+      simp only [f, hk0, ↓reduceDIte, hkp, ht_eq i, ht0, ↓reduceIte, hksub] at hcon
+      exact mul_left_cancel₀ ht0 (by simpa [y, ht_eq i] using hcon)
+
+private lemma emptyFive_almostSixEmbedding :
+    IsAlmostSixEmbedding (fun (_ : Fin 5 → ℝ) => (Fin.elim0 : Fin 0 → ℝ)) := by
+  refine ⟨continuousOn_const, fun x hx hdisj => ?_⟩
+  exfalso
+  have hex : ∀ i : Fin 6, ∃ v : Fin 5, x i v ≠ 0 := fun i => by
+    by_contra hzero
+    push Not at hzero
+    have hsum0 : (∑ v : Fin 5, x i v) = 0 := Finset.sum_eq_zero fun v _ => hzero v
+    linarith [(hx i).2]
+  choose v hv using hex
+  obtain ⟨i, j, hij, hvij⟩ := Fintype.exists_ne_map_eq_of_card_lt v (by simp)
+  rcases hdisj i j hij (v i) with hi0 | hj0
+  · exact hv i hi0
+  · rw [hvij] at hj0
+    exact hv j hj0
+
+/-- Join-padding preserves almost six-embeddings (adding 5 vertices and 1 target coordinate). -/
+private lemma padding_almostSixEmbedding {n q : ℕ}
+    {g : (Fin n → ℝ) → (Fin q → ℝ)} (hg : IsAlmostSixEmbedding g) :
+    ∃ f : (Fin (n + 5) → ℝ) → (Fin (q + 1) → ℝ),
+      IsAlmostSixEmbedding f := by
+  simpa using join_almostSixEmbedding hg emptyFive_almostSixEmbedding
 
 private lemma reindex_almostSixEmbedding {n m q r : ℕ} (hn : n = m) (hq : q = r)
     {g : (Fin n → ℝ) → (Fin q → ℝ)} (hg : IsAlmostSixEmbedding g) :
@@ -247,24 +321,58 @@ private lemma reindex_almostSixEmbedding {n m q r : ℕ} (hn : n = m) (hq : q = 
     have hcon := congrFun heq (Fin.cast hq j)
     simpa [f] using hcon
 
-private lemma iterated_padding (k : ℕ) :
-    ∃ f : (Fin (36 + 5 * k) → ℝ) → (Fin (6 + k) → ℝ),
+private lemma iterated_padding_from {n₀ q₀ : ℕ} (k : ℕ)
+    {g₀ : (Fin n₀ → ℝ) → (Fin q₀ → ℝ)} (hg₀ : IsAlmostSixEmbedding g₀) :
+    ∃ f : (Fin (n₀ + 5 * k) → ℝ) → (Fin (q₀ + k) → ℝ),
       IsAlmostSixEmbedding f := by
   induction k with
   | zero =>
-    simpa using tverberg_counterexample
+    simpa using ⟨g₀, hg₀⟩
   | succ k ih =>
     obtain ⟨g, hg⟩ := ih
-    obtain ⟨f, hf⟩ := padding_almostSixEmbedding (by omega : 0 < 36 + 5 * k) hg
-    exact reindex_almostSixEmbedding (by omega : 36 + 5 * k + 5 = 36 + 5 * (k + 1))
-      (by omega : 6 + k + 1 = 6 + (k + 1)) hf
+    obtain ⟨f, hf⟩ := padding_almostSixEmbedding hg
+    exact reindex_almostSixEmbedding (by omega : n₀ + 5 * k + 5 = n₀ + 5 * (k + 1))
+      (by omega : q₀ + k + 1 = q₀ + (k + 1)) hf
 
-private lemma padded_almostSixEmbedding {d : ℕ} (hd : 24 ≤ d) :
-    ∃ g : (Fin (5 * d - 4) → ℝ) → (Fin (d - 2) → ℝ),
+/-- **Best unconditional Tverberg counterexample for `r = 6`**: in every dimension `d ≥ 6`,
+there is an almost six-embedding `Δ^(5d+5) → ℝ^d` (`5d + 6` vertices). -/
+theorem tverberg_counterexample_ge_six (d : ℕ) (hd : 6 ≤ d) :
+    ∃ f : (Fin (5 * d + 6) → ℝ) → (Fin d → ℝ),
+      IsAlmostSixEmbedding f := by
+  obtain ⟨g₀, hg₀⟩ := tverberg_counterexample
+  obtain ⟨g, hg⟩ := iterated_padding_from (d - 6) hg₀
+  exact reindex_almostSixEmbedding (by omega : 36 + 5 * (d - 6) = 5 * d + 6)
+    (by omega : 6 + (d - 6) = d) hg
+
+/-- **Fivefold join of Theorem A (no `[AKS]` needed)**: an unconditional almost six-embedding
+`Δ¹⁷⁹ → ℝ³⁴` (`180 = 5 * 36` vertices, `34 = 36 - 2` target coordinates). -/
+theorem fivefold_tverberg_join :
+    ∃ f : (Fin 180 → ℝ) → (Fin 34 → ℝ),
+      IsAlmostSixEmbedding f := by
+  obtain ⟨f₁, hf₁⟩ := tverberg_counterexample
+  obtain ⟨f₂, hf₂⟩ := join_almostSixEmbedding hf₁ hf₁
+  obtain ⟨f₃, hf₃⟩ := join_almostSixEmbedding hf₂ hf₁
+  obtain ⟨f₄, hf₄⟩ := join_almostSixEmbedding hf₃ hf₁
+  exact join_almostSixEmbedding hf₄ hf₁
+
+/-- **Padded fivefold join (`d ≥ 36`, no `[AKS]`)**: for every `d ≥ 36`, there exists an
+unconditional almost six-embedding `Δ^(5d-1) → ℝ^(d-2)` (`5d` vertices). -/
+theorem padded_tverberg_ge_36 (d : ℕ) (hd : 36 ≤ d) :
+    ∃ g : (Fin (5 * d) → ℝ) → (Fin (d - 2) → ℝ),
       IsAlmostSixEmbedding g := by
-  obtain ⟨g, hg⟩ := iterated_padding (d - 8)
-  exact reindex_almostSixEmbedding (by omega : 36 + 5 * (d - 8) = 5 * d - 4)
-    (by omega : 6 + (d - 8) = d - 2) hg
+  obtain ⟨g₀, hg₀⟩ := fivefold_tverberg_join
+  obtain ⟨g, hg⟩ := iterated_padding_from (d - 36) hg₀
+  exact reindex_almostSixEmbedding (by omega : 180 + 5 * (d - 36) = 5 * d)
+    (by omega : 34 + (d - 36) = d - 2) hg
+
+/-- **Twofold seven-color join**: given an almost six-embedding `f₇ : Δ⁴¹ → ℝ⁷`
+(Section 2.3 of the research report), its self-join gives an almost six-embedding
+`Δ⁸³ → ℝ¹⁵` (`84` vertices). -/
+theorem twofold_seven_color_join
+    {f₇ : (Fin 42 → ℝ) → (Fin 7 → ℝ)} (hf₇ : IsAlmostSixEmbedding f₇) :
+    ∃ f : (Fin 84 → ℝ) → (Fin 15 → ℝ),
+      IsAlmostSixEmbedding f := by
+  simpa using join_almostSixEmbedding hf₇ hf₇
 
 /-! ### Helper 2: Hausdorff-continuous inward distance (Lemma 5.3) -/
 
@@ -450,12 +558,14 @@ private lemma normalized_ball_measure_props {d : ℕ} {eta : ℝ}
   · rw [hmu_ball, hmu_S]
     norm_num
 
-/-- **Theorem B**: In every dimension `d ≥ 24`, there exist `d - 1` continuous
-functionals on convex bodies and an absolutely continuous probability measure
-such that no convex six-partition of the unit ball into six parts of equal
-measure equalizes all these functionals. -/
-theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
-    (p : Fin (5 * d - 4) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+/-- **General convex equipartition transfer**: given any almost six-embedding
+`g : Δ^(m-1) → ℝ^(d-2)` and `m` blocking markers `(p, eta)` in dimension `d ≥ 2`,
+constructs `d - 1` continuous functionals `Phi` and an absolutely continuous
+probability measure `mu` (and in fact works uniformly for every `eta`-concentrated
+absolutely continuous measure) such that no fair convex six-partition equalizes `Phi`. -/
+theorem convex_partition_of_embedding_and_blocking {d m : ℕ} (hd : 2 ≤ d)
+    {g : (Fin m → ℝ) → (Fin (d - 2) → ℝ)} (hg : IsAlmostSixEmbedding g)
+    {p : Fin m → Ambient d} {eta : ℝ} (hp : IsBlocking p eta) :
     ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
       Continuous Phi ∧
       IsProbabilityMeasure mu ∧
@@ -465,25 +575,18 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
         (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
         ∃ i, Phi (C i) ≠ Phi (C 0) := by
   have hd_pos : 0 < d := by omega
-  obtain ⟨g, hg⟩ := padded_almostSixEmbedding hd
-  have hcompact : IsCompact (simplex (5 * d - 4)) := isCompact_stdSimplex ℝ (Fin (5 * d - 4))
-  obtain ⟨M₀, hM₀⟩ := hcompact.exists_bound_of_continuousOn hg.1
-  let M : ℝ := max M₀ 0
-  have hM_nonneg : 0 ≤ M := le_max_right M₀ 0
-  have hbound : ∀ y ∈ simplex (5 * d - 4), ∀ j : Fin (d - 2), |g y j| ≤ M := by
-    intro y hy j
-    exact (norm_le_pi_norm (g y) j).trans ((hM₀ y hy).trans (le_max_left M₀ 0))
-  let w : Body d → Fin (5 * d - 4) → ℝ := fun C a => inwardDist (p a) C
+  let w : Body d → Fin m → ℝ := fun C a => inwardDist (p a) C
   let s : Body d → ℝ := fun C => ∑ a, w C a
   let Phi : Body d → (Fin (d - 1) → ℝ) := fun C k =>
-    if hk : k.1 = 0 then s C
+    if _hk : k.1 = 0 then s C
     else
       if s C = 0 then 0
-      else s C * g (fun a => w C a / s C) ⟨k.1 - 1, by omega⟩
+      else s C * g (fun a => w C a / s C) ⟨k.1 - 1, by have := k.isLt; omega⟩
   have hw_nonneg : ∀ C a, 0 ≤ w C a := fun _ _ => Metric.infDist_nonneg
   have hs_nonneg : ∀ C, 0 ≤ s C := fun C => Finset.sum_nonneg fun a _ => hw_nonneg C a
-  have hs_cont : Continuous s := continuous_finsetSum _ fun a _ => continuous_inwardDist hd_pos (p a)
-  have h_simplex_of_pos : ∀ C, s C ≠ 0 → (fun a => w C a / s C) ∈ simplex (5 * d - 4) := by
+  have hs_cont : Continuous s :=
+    continuous_finsetSum _ fun a _ => continuous_inwardDist hd_pos (p a)
+  have h_simplex_of_pos : ∀ C, s C ≠ 0 → (fun a => w C a / s C) ∈ simplex m := by
     intro C hsC
     refine ⟨fun a => div_nonneg (hw_nonneg C a) (hs_nonneg C), ?_⟩
     rw [← Finset.sum_div]
@@ -493,55 +596,14 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
     by_cases hk : k.1 = 0
     · simpa [Phi, hk] using hs_cont
     · have hfun :
-          (fun C : Body d => Phi C k) =
-            fun C => if s C = 0 then 0 else s C * g (fun a => w C a / s C) ⟨k.1 - 1, by omega⟩ :=
-        funext fun C => by simp [Phi, hk]
+          (fun C : Body d => Phi C k) = fun C =>
+            let s' := ∑ a, w C a
+            if s' = 0 then 0 else s' * g (fun a => w C a / s') ⟨k.1 - 1, by have := k.isLt; omega⟩ :=
+        funext fun C => by simp [Phi, hk, s]
       rw [hfun]
-      refine continuous_iff_continuousAt.mpr fun C₀ => ?_
-      by_cases hs₀ : s C₀ = 0
-      · change Filter.Tendsto (fun C : Body d =>
-          if s C = 0 then (0 : ℝ)
-          else s C * g (fun a => w C a / s C) ⟨k.1 - 1, by omega⟩) (𝓝 C₀) (𝓝 _)
-        dsimp only
-        simp only [hs₀, ↓reduceIte]
-        refine tendsto_zero_iff_norm_tendsto_zero.mpr ?_
-        refine squeeze_zero' (g := fun C => M * s C)
-          (Filter.Eventually.of_forall fun _ => norm_nonneg _)
-          (Filter.Eventually.of_forall fun C => ?_) ?_
-        · by_cases hsC : s C = 0
-          · simp [hsC, M, hM_nonneg, hs_nonneg C]
-          · simp only [hsC, ↓reduceIte, Real.norm_eq_abs, abs_mul]
-            have hyC : (fun a => w C a / s C) ∈ simplex (5 * d - 4) :=
-              h_simplex_of_pos C hsC
-            have hle := hbound _ hyC ⟨k.1 - 1, by omega⟩
-            calc
-              |s C| * |g (fun a => w C a / s C) ⟨k.1 - 1, by omega⟩|
-                ≤ |s C| * M := by gcongr
-              _ = M * |s C| := mul_comm _ _
-              _ = M * s C := by rw [abs_of_nonneg (hs_nonneg C)]
-        · have htend : Filter.Tendsto (fun C : Body d => M * s C) (𝓝 C₀) (𝓝 (M * s C₀)) :=
-            (continuous_const.mul hs_cont).continuousAt.tendsto
-          simpa [hs₀] using htend
-      · let yMap : Body d → Fin (5 * d - 4) → ℝ := fun C a => w C a / s C
-        have hyMap_cont : ContinuousAt yMap C₀ := by
-          refine continuousAt_pi.mpr fun a => ?_
-          exact ((continuous_inwardDist hd_pos (p a)).continuousAt).div
-            hs_cont.continuousAt hs₀
-        have hnhds : {C : Body d | s C ≠ 0} ∈ 𝓝 C₀ :=
-          hs_cont.continuousAt.preimage_mem_nhds (isOpen_ne.mem_nhds hs₀)
-        have h_maps : Filter.Tendsto yMap (𝓝 C₀) (𝓝[simplex (5 * d - 4)] (yMap C₀)) := by
-          refine tendsto_nhdsWithin_iff.mpr ⟨hyMap_cont.tendsto, ?_⟩
-          filter_upwards [hnhds] with C hC
-          exact h_simplex_of_pos C hC
-        have hg_at : ContinuousWithinAt (fun y => g y ⟨k.1 - 1, by omega⟩)
-            (simplex (5 * d - 4)) (yMap C₀) :=
-          (continuous_apply _).continuousAt.comp_continuousWithinAt
-            (hg.1 (yMap C₀) (h_simplex_of_pos C₀ hs₀))
-        have h_prod : ContinuousAt (fun C : Body d => s C * g (yMap C) ⟨k.1 - 1, by omega⟩) C₀ :=
-          hs_cont.continuousAt.mul (hg_at.tendsto.comp h_maps)
-        refine h_prod.congr ?_
-        filter_upwards [hnhds] with C hC
-        simp [hC, yMap]
+      exact continuousOn_univ.mp <| continuousOn_perspective
+        (fun a => (continuous_inwardDist hd_pos (p a)).continuousOn)
+        (fun C _ a => hw_nonneg C a) hg.1 ⟨k.1 - 1, by have := k.isLt; omega⟩
   have hPhi_obstruct :
       ∀ C : Fin 6 → Body d,
         IsSixPartition C →
@@ -566,8 +628,8 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
         exact ⟨y, hyC, by simpa [Metric.mem_closedBall, dist_zero_right] using hyeta⟩
       exact hno_int i a ha
     · have hsi_ne : ∀ i, s (C i) ≠ 0 := fun i => (hs_eq i).symm ▸ hs0
-      let x : Fin 6 → Fin (5 * d - 4) → ℝ := fun i a => w (C i) a / s (C i)
-      have hx_mem : ∀ i, x i ∈ simplex (5 * d - 4) :=
+      let x : Fin 6 → Fin m → ℝ := fun i a => w (C i) a / s (C i)
+      have hx_mem : ∀ i, x i ∈ simplex m :=
         fun i => h_simplex_of_pos (C i) (hsi_ne i)
       have hx_disj : DisjointSupports x := by
         intro i j hij a
@@ -591,11 +653,11 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
       obtain ⟨i, hi_ne⟩ := hg.2 x hx_mem hx_disj
       apply hi_ne
       funext j
-      let k : Fin (d - 1) := ⟨j.1 + 1, by omega⟩
+      let k : Fin (d - 1) := ⟨j.1 + 1, by have := j.isLt; omega⟩
       have hk0 : k.1 ≠ 0 := by simp [k]
       have hcon := congrFun (h_all i) k
       simp only [Phi, hk0, ↓reduceDIte, hs_eq i, hs0, ↓reduceIte, k] at hcon
-      have hksub : (⟨j.1 + 1 - 1, by omega⟩ : Fin (d - 2)) = j := by
+      have hksub : (⟨j.1 + 1 - 1, by have := j.isLt; omega⟩ : Fin (d - 2)) = j := by
         ext; simp
       rw [hksub] at hcon
       have hmul : s (C 0) * g (x i) j = s (C 0) * g (x 0) j := by
@@ -617,6 +679,73 @@ theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
     normalized_ball_measure_props (d := d) hp.1 hp.2.1
   exact ⟨Phi, _, hPhi_cont, hprob, hac,
     fun C hC hfair => h_unif _ hac hpos htop hconc C hC hfair⟩
+
+private theorem convex_partition_from_base {d₀ d : ℕ} (hd₀ : 2 ≤ d₀) (hd : d₀ ≤ d)
+    {g₀ : (Fin (5 * d₀) → ℝ) → (Fin (d₀ - 2) → ℝ)} (hg₀ : IsAlmostSixEmbedding g₀)
+    {p : Fin (5 * d) → Ambient d} {eta : ℝ} (hp : IsBlocking p eta) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) := by
+  obtain ⟨g₁, hg₁⟩ := iterated_padding_from (d - d₀) hg₀
+  obtain ⟨g, hg⟩ := reindex_almostSixEmbedding (by omega : 5 * d₀ + 5 * (d - d₀) = 5 * d)
+    (by omega : (d₀ - 2) + (d - d₀) = d - 2) hg₁
+  exact convex_partition_of_embedding_and_blocking (by omega) hg hp
+
+/-- **Theorem B**: In every dimension `d ≥ 24`, given an almost six-embedding
+`g₀ : Δ¹¹⁹ → ℝ²²` (Theorem C of the paper) and `5 * d` blocking markers `(p, eta)`,
+there exist `d - 1` continuous functionals on convex bodies and an absolutely continuous
+probability measure such that no convex six-partition of the unit ball into six parts
+of equal measure equalizes all these functionals. -/
+theorem convex_partition_counterexample (d : ℕ) (hd : 24 ≤ d)
+    (g₀ : (Fin 120 → ℝ) → (Fin 22 → ℝ)) (hg₀ : IsAlmostSixEmbedding g₀)
+    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) :=
+  convex_partition_from_base (by norm_num : 2 ≤ 24) hd hg₀ hp
+
+/-- **Conditional `d ≥ 18` reduction (Section 3.1–3.3 of the research report)**: in every
+dimension `d ≥ 18`, given an almost six-embedding `g₀ : Δ⁸⁹ → ℝ¹⁶` and `5 * d` blocking
+markers `(p, eta)`, join-padding `d - 18` times and inward-distance transfer yield the
+same obstruction. -/
+theorem convex_partition_counterexample_ge_18 (d : ℕ) (hd : 18 ≤ d)
+    (g₀ : (Fin 90 → ℝ) → (Fin 16 → ℝ)) (hg₀ : IsAlmostSixEmbedding g₀)
+    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) :=
+  convex_partition_from_base (by norm_num : 2 ≤ 18) hd hg₀ hp
+
+/-- **`[AKS]`-free Convex Equipartition Transfer (`d ≥ 36`)**: In every dimension `d ≥ 36`,
+using the unconditional fivefold join of Theorem A (`fivefold_tverberg_join`), `5 * d`
+blocking markers suffice without any external almost-six-embedding assumption. -/
+theorem convex_partition_counterexample_ge_36 (d : ℕ) (hd : 36 ≤ d)
+    (p : Fin (5 * d) → Ambient d) (eta : ℝ) (hp : IsBlocking p eta) :
+    ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
+      Continuous Phi ∧
+      IsProbabilityMeasure mu ∧
+      mu.AbsolutelyContinuous volume ∧
+      ∀ C : Fin 6 → Body d,
+        IsSixPartition C →
+        (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
+        ∃ i, Phi (C i) ≠ Phi (C 0) := by
+  obtain ⟨g₀, hg₀⟩ := fivefold_tverberg_join
+  exact convex_partition_from_base (by norm_num : 2 ≤ 36) hd hg₀ hp
 
 end AkopyanSixfold
 end

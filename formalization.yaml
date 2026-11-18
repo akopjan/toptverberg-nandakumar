@@ -33,22 +33,32 @@ sources:
     year: 2026
     note: >-
       Theorem A (AkopyanSixfold.tverberg_counterexample) is formalized
-      unconditionally. Theorem B (AkopyanSixfold.convex_partition_counterexample)
-      is formalized for absolutely continuous probability measures conditional on
-      a blocking marker hypothesis IsBlocking p eta (Lemmas 5.1--5.2), proving
-      the join-padding reduction (Lemma 3.3), Hausdorff-continuous inward-distance
-      transfer (Lemma 5.3), concentrated-measure fairness (Lemma 5.4), and a
-      normalized Lebesgue ball probability measure.
+      unconditionally, together with its join-padded extension for all d ≥ 6
+      (tverberg_counterexample_ge_six) and fivefold join for d ≥ 36
+      (fivefold_tverberg_join, padded_tverberg_ge_36) in Solution.lean. Theorem B
+      (AkopyanSixfold.convex_partition_counterexample) is formalized for
+      absolutely continuous probability measures in every dimension d ≥ 24
+      conditional on Theorem C (g₀ : Δ¹¹⁹ → ℝ²²) and 5d blocking markers
+      satisfying IsBlocking p eta (Lemmas 5.1--5.2), proving join-padding
+      (Lemma 3.3 / Corollary 3.4), Hausdorff-continuous inward-distance transfer
+      (Lemma 5.3), concentrated-measure fairness (Lemma 5.4), and a normalized
+      Lebesgue ball witness; for d ≥ 36, convex_partition_counterexample_ge_36
+      eliminates the Theorem C hypothesis via the fivefold join of Theorem A.
 
 status:
   scope: >-
     Sorry-free Lean 4 formalization of AkopyanSixfold.tverberg_counterexample
-    (unconditional proof of Theorem A: an almost six-embedding Δ³⁵ → ℝ⁶) and
-    AkopyanSixfold.convex_partition_counterexample (conditional on IsBlocking p eta,
-    proving the join-padding reduction, inward-distance transfer, and absolutely
-    continuous probability measure obstruction for d ≥ 24). Verified with
-    comparator under standard Lean 4 axioms [propext, Quot.sound, Classical.choice]
-    without custom axioms or sorry.
+    (unconditional proof of Theorem A: an almost six-embedding Δ³⁵ → ℝ⁶),
+    tverberg_counterexample_ge_six (Δ^(5d+5) → ℝ^d for d ≥ 6),
+    fivefold_tverberg_join (Δ¹⁷⁹ → ℝ³⁴), padded_tverberg_ge_36 (Δ^(5d-1) → ℝ^(d-2)
+    for d ≥ 36), twofold_seven_color_join (Δ⁴¹ → ℝ⁷ implies Δ⁸³ → ℝ¹⁵),
+    AkopyanSixfold.convex_partition_counterexample (conditional on Theorem C and
+    IsBlocking p eta for 5d markers when d ≥ 24),
+    convex_partition_counterexample_ge_18 (conditional on Δ⁸⁹ → ℝ¹⁶ and
+    IsBlocking p eta for 5d markers when d ≥ 18), and
+    convex_partition_counterexample_ge_36 (conditional only on IsBlocking p eta
+    when d ≥ 36). Verified with comparator under standard Lean 4 axioms
+    [propext, Quot.sound, Classical.choice] without custom axioms or sorry.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -83,20 +93,22 @@ fidelity:
     Lemmas 5.1--5.2 construct 5d rational blocking markers and a central-avoidance
     radius eta ∈ (0, 1). In Challenge.lean, neither Theorem C nor the
     semialgebraic blocking construction (Lemmas 5.1--5.2) is formalized; instead,
-    AkopyanSixfold.convex_partition_counterexample takes a tuple p of 5d − 4
-    markers and radius eta satisfying IsBlocking p eta as an explicit
-    hypothesis, and states the existence of d − 1 continuous functionals Phi and
-    an absolutely continuous probability measure mu ≪ volume. Internally,
-    Solution.lean unconditionally formalizes join-padding d − 8 times from
-    Theorem A to obtain an almost six-embedding on 5d − 4 vertices into ℝ^(d−2)
-    (Lemma 3.3), proves Hausdorff continuity via Hahn--Banach separation and
-    constructs Phi before any measure (Lemma 5.3), proves the concentrated-measure
-    fairness lemma (Lemma 5.4) uniformly for all eta-concentrated measures, and
-    instantiates it with a normalized Lebesgue ball probability measure. Note
-    that the explicit uniform quantifier (∀ mu ...) is proved internally rather
-    than exposed as a separate conjunct in the simplified Challenge.lean target,
-    and that the semialgebraic dimension count of Lemma 5.1 requires 5d
-    markers rather than 5d − 4.
+    AkopyanSixfold.convex_partition_counterexample takes an almost six-embedding
+    g₀ : Δ¹¹⁹ → ℝ²² (Theorem C) and a tuple p of 5d markers and radius eta
+    satisfying IsBlocking p eta as explicit hypotheses, and states the existence
+    of d − 1 continuous functionals Phi and an absolutely continuous probability
+    measure mu ≪ volume. Internally, Solution.lean proves the binary join lemma
+    join_almostSixEmbedding, the unconditional d ≥ 6 Tverberg extension
+    tverberg_counterexample_ge_six, the unconditional fivefold join
+    fivefold_tverberg_join : Δ¹⁷⁹ → ℝ³⁴ and padded_tverberg_ge_36 (for d ≥ 36),
+    twofold_seven_color_join (Δ⁴¹ → ℝ⁷ implies Δ⁸³ → ℝ¹⁵), join-padding d − 24
+    times from g₀ to Δ^(5d−1) → ℝ^(d−2) (Corollary 3.4), Hausdorff continuity
+    via Hahn--Banach separation and inward-distance transfer (Lemma 5.3), the
+    concentrated-measure fairness lemma (Lemma 5.4), a normalized Lebesgue ball
+    witness, the d ≥ 18 reduction convex_partition_counterexample_ge_18, and the
+    [AKS]-free variant convex_partition_counterexample_ge_36 (d ≥ 36). Note that
+    the explicit uniform quantifier (∀ mu ...) is proved internally rather than
+    exposed as a separate conjunct in the simplified Challenge.lean target.
 
 automation:
   methods:
@@ -123,12 +135,15 @@ alignment:
     - source: "Sixfold Tverberg counterexamples and convex equipartition obstructions (paper/manuscript.tex), Theorem B"
       lean: "AkopyanSixfold.convex_partition_counterexample"
       module: "Challenge"
-      status: "proved (conditional on IsBlocking p eta)"
+      status: "proved (conditional on Theorem C and IsBlocking p eta)"
       note: >-
         Formalizes Theorem B for an absolutely continuous probability measure in
-        every dimension d ≥ 24, conditional on an explicit blocking tuple of
-        5d − 4 markers (IsBlocking p eta). Solution.lean proves the join-padding
-        reduction (Lemma 3.3), 1-Lipschitz Hausdorff-continuous inward-distance
-        transfer (Lemma 5.3), concentrated-measure fairness lemma (Lemma 5.4),
-        and normalized Lebesgue ball measure witness, while omitting Theorem C
-        (Δ¹¹⁹ → ℝ²²) and the semialgebraic blocking construction (Lemmas 5.1--5.2).
+        every dimension d ≥ 24, conditional on Theorem C (g₀ : Δ¹¹⁹ → ℝ²²) and
+        an explicit blocking tuple of 5d markers (IsBlocking p eta). Solution.lean
+        also proves the [AKS]-free variant convex_partition_counterexample_ge_36
+        for d ≥ 36 via the fivefold join of Theorem A, alongside the binary join
+        lemma, join-padding (Lemma 3.3 / Corollary 3.4), 1-Lipschitz
+        Hausdorff-continuous inward-distance transfer (Lemma 5.3),
+        concentrated-measure fairness lemma (Lemma 5.4), and normalized Lebesgue
+        ball measure witness, while omitting Theorem C (Δ¹¹⁹ → ℝ²²) and the
+        semialgebraic blocking construction (Lemmas 5.1--5.2).

@@ -195,18 +195,27 @@ are proved completely without \texttt{sorry} in \texttt{Solution.lean} on Lean~4
 (\texttt{v4.35.0}) and Mathlib~(\texttt{v4.35.0}), using only the standard
 axioms \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
 Theorem~\ref{thm:A} is verified unconditionally via the scalar height-table
-reduction and piecewise-linear surgery in \texttt{RequestProject/}.
+reduction and piecewise-linear surgery in \texttt{RequestProject/}, and
+extended unconditionally to $\Delta^{5d+5}\to\R^d$ for all $d\ge6$ and to the
+fivefold join $\Delta^{179}\to\R^{34}$ ($\Delta^{5d-1}\to\R^{d-2}$ for $d\ge36$)
+via the general binary-join lemma in \texttt{Solution.lean}.
 \texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}
 formalizes Theorem~\ref{thm:B} in every dimension $d\ge24$ for an absolutely
-continuous probability measure conditionally on a blocking configuration of
-$5d-4$ markers (\texttt{IsBlocking}; Section~\ref{sec:formal}): internally,
-\texttt{Solution.lean} proves the join-padding reduction
-(Lemma~\ref{lem:padding}), the $1$-Lipschitz Hausdorff-continuity and
-inward-distance transfer (Lemma~\ref{lem:transfer}), the concentrated-measure
-fairness lemma (Lemma~\ref{lem:mass}), and instantiates a normalized Lebesgue
-ball probability measure. Neither Theorem~\ref{thm:C} nor the semialgebraic
-blocking construction of Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral} is
-formalized in Lean.
+continuous probability measure conditionally on Theorem~\ref{thm:C}
+($g_0:\Delta^{119}\to\R^{22}$) and a blocking configuration of $5d$ markers
+(\texttt{IsBlocking}; Section~\ref{sec:formal}): internally,
+\texttt{Solution.lean} proves the binary join and padding reduction
+(Lemma~\ref{lem:padding} and Corollary~\ref{cor:wideall}), the $1$-Lipschitz
+Hausdorff-continuity and inward-distance transfer (Lemma~\ref{lem:transfer}), the
+concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), instantiates a
+normalized Lebesgue ball probability measure, and proves the \cite{AKS}-free
+variant \texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_36}
+for $d\ge36$, together with the conditional reductions
+\texttt{twofold\_\allowbreak seven\_\allowbreak color\_\allowbreak join} and
+\texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_18}.
+Neither Theorem~\ref{thm:C} nor the semialgebraic blocking
+construction of Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral} is formalized
+in Lean.
 \end{sloppypar}
 
 \section{Height tables and their forbidden subspaces}\label{sec:tables}
@@ -1204,17 +1213,24 @@ in \texttt{Solution.lean} and all its dependencies.
 Theorem~\ref{thm:A} (\texttt{AkopyanSixfold.\allowbreak tverberg\_\allowbreak counterexample})
 is proved unconditionally via the scalar height-table reduction, rational shell
 degree balance, and piecewise-linear zero-cancellation surgery in
-\texttt{RequestProject/}. Theorem~\ref{thm:B}
+\texttt{RequestProject/}, together with its padded extensions for all $d\ge6$
+and fivefold join $\Delta^{179}\to\R^{34}$ in \texttt{Solution.lean}.
+Theorem~\ref{thm:B}
 (\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample})
 is formalized in every dimension $d\ge24$ for an absolutely continuous
-probability measure conditionally on a blocking configuration of $5d-4$ markers
-(\texttt{IsBlocking}): \texttt{Solution.lean} proves the join-padding
-reduction (Lemma~\ref{lem:padding}), the $1$-Lipschitz Hausdorff-continuity and
-transfer of the inward-distance body functionals (Lemma~\ref{lem:transfer}),
-the concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), and
-instantiates a normalized Lebesgue ball witness, without formalizing
-Theorem~\ref{thm:C} or the semialgebraic blocking construction of
-Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral}.
+probability measure conditionally on Theorem~\ref{thm:C}
+($g_0:\Delta^{119}\to\R^{22}$) and a blocking configuration of $5d$ markers
+(\texttt{IsBlocking}): \texttt{Solution.lean} proves the binary join and
+join-padding reduction (Lemma~\ref{lem:padding} and Corollary~\ref{cor:wideall}),
+the $1$-Lipschitz Hausdorff-continuity and transfer of the inward-distance body
+functionals (Lemma~\ref{lem:transfer}), the concentrated-measure fairness lemma
+(Lemma~\ref{lem:mass}), instantiates a normalized Lebesgue ball witness, and
+provides the \cite{AKS}-free theorem
+\texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_36}
+for $d\ge36$, as well as \texttt{twofold\_\allowbreak seven\_\allowbreak color\_\allowbreak join}
+and \texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_18},
+without formalizing Theorem~\ref{thm:C} or the semialgebraic
+blocking construction of Lemmas~\ref{lem:blockers}--\ref{lem:nearcentral}.
 Kernel axiom inspection confirms that both declared theorems depend exclusively
 on \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.
 \end{sloppypar}
