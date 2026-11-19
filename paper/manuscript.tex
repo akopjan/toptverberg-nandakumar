@@ -202,24 +202,26 @@ $\Delta^{179}\to\R^{34}$ ($\Delta^{5d-1}\to\R^{d-2}$ for $d\ge36$), and the
 $(k+1)$-fold join (\texttt{kfold\_tverberg\_join}).
 \texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample}
 formalizes Theorem~\ref{thm:B} completely unconditionally in every dimension
-$d\ge288$ (with no external almost six-embedding, margin $\eta$, or
+$d\ge36$ (with no external almost six-embedding, margin $\eta$, or
 blocking-point assumptions in \texttt{Challenge.lean}): \texttt{Solution.lean}
-proves the unconditional existence of $5d+36$ central blocking markers for all
-$d\ge5$ (\texttt{exists\_\allowbreak isBlocking}, via Hahn--Banach separating
-normals, normal rank $\le 5$ in Lemma~\ref{lem:rank}, Gaussian elimination to
-RREF, and Lebesgue-null differentiable parametrization), proves the Blaschke
-selection theorem
+proves the unconditional existence of $5d$ central blocking markers for all
+$d\ge30$ (\texttt{exists\_\allowbreak isBlocking\_\allowbreak 5d}, via
+Hahn--Banach separating normals, normal rank $\le 5$ in Lemma~\ref{lem:rank},
+rank-$4$ Gaussian elimination to RREF, full rank-$5$ spanning-tree
+parametrization \texttt{exists\_\allowbreak treeParam}, and Lebesgue-null
+differentiable parametrization), proves the Blaschke selection theorem
 (\texttt{blaschke\_\allowbreak isCompact\_\allowbreak subsets\_\allowbreak unitBall}),
 deduces the central-avoidance margin $\eta\in(0,1)$
 (\texttt{exists\_\allowbreak eta\_\allowbreak of\_\allowbreak isBlocking}, Lemma~\ref{lem:nearcentral}),
-constructs an unconditional almost six-embedding $\Delta^{5d+35}\to\R^{d-2}$
-from a $41$-fold binary join of Theorem~\ref{thm:A} plus join-padding
-(Lemma~\ref{lem:padding}), proves $1$-Lipschitz Hausdorff-continuity and
+constructs an unconditional almost six-embedding $\Delta^{5d-1}\to\R^{d-2}$
+from the fivefold join of Theorem~\ref{thm:A} (\texttt{fivefold\_\allowbreak tverberg\_\allowbreak join})
+plus join-padding (Lemma~\ref{lem:padding}), proves $1$-Lipschitz Hausdorff-continuity and
 inward-distance transfer (Lemma~\ref{lem:transfer}), proves the
 concentrated-measure fairness lemma (Lemma~\ref{lem:mass}), and instantiates
-a normalized Lebesgue ball probability measure. Additional conditional
-reductions matching the sharper parameter counts of Theorem~\ref{thm:C} and
-Theorem~\ref{thm:conedim} ($d\ge24$, $d\ge36$, and $d\ge18$) are also
+a normalized Lebesgue ball probability measure. Additional blocking-point
+reductions for $d\ge24$ and $d\ge18$
+(\texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_24},
+\texttt{convex\_\allowbreak partition\_\allowbreak counterexample\_\allowbreak ge\_18}) are also
 verified in \texttt{Solution.lean}.
 \end{sloppypar}
 
@@ -1222,19 +1224,21 @@ degree balance, and piecewise-linear zero-cancellation surgery in
 and fivefold join $\Delta^{179}\to\R^{34}$ in \texttt{Solution.lean}.
 Theorem~\ref{thm:B}
 (\texttt{AkopyanSixfold.\allowbreak convex\_\allowbreak partition\_\allowbreak counterexample})
-is formalized completely unconditionally in every dimension $d\ge288$ (with no
+is formalized completely unconditionally in every dimension $d\ge36$ (with no
 external almost six-embedding, margin $\eta$, or blocking-point assumptions in
 \texttt{Challenge.lean}): \texttt{Solution.lean} proves the unconditional
-existence of $5d+36$ central blocking points (\texttt{exists\_isBlocking}, via
-Hahn--Banach separating normals, Lemma~\ref{lem:rank}, Gaussian elimination to
-RREF, and Lebesgue-null differentiable parametrization), proves the Blaschke
-selection theorem and Lemma~\ref{lem:nearcentral}, combines a $41$-fold binary
-join of Theorem~\ref{thm:A} with join-padding (Lemma~\ref{lem:padding}) to
-obtain $\Delta^{5d+35}\to\R^{d-2}$ without~\cite{AKS}, and proves
+existence of $5d$ central blocking points for $d\ge30$
+(\texttt{exists\_isBlocking\_5d}, via Hahn--Banach separating normals,
+Lemma~\ref{lem:rank}, rank-$4$ RREF reduction, rank-$5$ spanning-tree
+parametrization \texttt{exists\_treeParam}, and Lebesgue-null differentiable
+parametrization), proves the Blaschke selection theorem and Lemma~\ref{lem:nearcentral},
+combines the fivefold join of Theorem~\ref{thm:A} (\texttt{fivefold\_tverberg\_join})
+with join-padding (Lemma~\ref{lem:padding}) to obtain
+$\Delta^{5d-1}\to\R^{d-2}$ without~\cite{AKS}, and proves
 Hausdorff-continuous inward-distance transfer (Lemma~\ref{lem:transfer}) and
 concentrated-measure fairness (Lemma~\ref{lem:mass}) with a normalized
-Lebesgue ball witness. For $d\ge24$, $d\ge36$, and $d\ge18$, conditional
-reductions matching the sharper parameter bounds of Theorems~\ref{thm:C}
+Lebesgue ball witness. For $d\ge24$ and $d\ge18$, blocking-point reductions
+matching the sharper parameter bounds of Theorems~\ref{thm:C}
 and~\ref{thm:conedim} are also included in \texttt{Solution.lean}.
 Kernel axiom inspection confirms that both declared theorems depend exclusively
 on \texttt{propext}, \texttt{Quot.sound}, and \texttt{Classical.choice}.

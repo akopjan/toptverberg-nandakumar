@@ -21,9 +21,9 @@ The challenge is specified in `Challenge.lean` and checked by the Palomar Compar
    ```
 
 2. **Theorem B (`AkopyanSixfold.convex_partition_counterexample`)**:
-   Unconditionally in every dimension $d \ge 288$, there exist $d - 1$ continuous functionals on convex bodies and an absolutely continuous probability measure such that no convex six-partition of the unit ball into six equal-measure parts equalizes all these functionals:
+   Unconditionally in every dimension $d \ge 36$, there exist $d - 1$ continuous functionals on convex bodies and an absolutely continuous probability measure such that no convex six-partition of the unit ball into six equal-measure parts equalizes all these functionals:
    ```lean
-   theorem convex_partition_counterexample (d : ℕ) (hd : 288 ≤ d) :
+   theorem convex_partition_counterexample (d : ℕ) (hd : 36 ≤ d) :
        ∃ (Phi : Body d → (Fin (d - 1) → ℝ)) (mu : Measure (Ambient d)),
          Continuous Phi ∧
          IsProbabilityMeasure mu ∧
@@ -33,13 +33,6 @@ The challenge is specified in `Challenge.lean` and checked by the Palomar Compar
            (∀ i, mu (C i : Set (Ambient d)) = mu (unitBall d) / 6) →
            ∃ i, Phi (C i) ≠ Phi (C 0)
    ```
-
----
-
-## Scope and Alignment with the Manuscript
-
-- **Theorem A (`RequestProject/` and `Solution.lean`)**: Proved unconditionally and without `sorry` via the scalar height-table reduction, rational boundary degree cancellation, and PL zero-cancellation surgery, together with the binary join (`join_almostSixEmbedding`), general padding for all $d \ge 6$ (`tverberg_counterexample_ge_six`: $\Delta^{5d+5} \to \mathbb{R}^d$), the fivefold join (`fivefold_tverberg_join`: $\Delta^{179} \to \mathbb{R}^{34}$, `padded_tverberg_ge_36`: $\Delta^{5d-1} \to \mathbb{R}^{d-2}$ for $d \ge 36$), and the general $(k+1)$-fold join (`kfold_tverberg_join`, `padded_tverberg_ge_288`: $\Delta^{5d+35} \to \mathbb{R}^{d-2}$ for $d \ge 288$).
-- **Theorem B (`Solution.lean`)**: Proved **completely unconditionally** (with no `g₀`, no `eta`, and no `IsBlocking` hypothesis in `Challenge.lean`) for every dimension $d \ge 288$ without `sorry` by: (1) constructing `5 * d + 36` central blocking markers unconditionally via `exists_isBlocking` (using Hahn–Banach separating hyperplanes, normal rank $\le 5$ in Lemma 4.2 [`central_partition_normal_rank`], Gaussian elimination to RREF [`exists_rref`], and Lebesgue measure zero of lower-dimensional differentiable images via `Measure.addHaar_submodule` and Sard/differentiable image nullity), (2) proving the Blaschke selection theorem (`blaschke_isCompact_subsets_unitBall`) and the central-avoidance margin lemma (`exists_eta_of_isBlocking`, Lemma 5.2) to deduce $\eta \in (0, 1)$, (3) combining the $41$-fold join of Theorem A with join-padding (`padded_tverberg_ge_288`) to obtain $\Delta^{5d+35} \to \mathbb{R}^{d-2}$ without `[AKS]`, and (4) transferring via Hausdorff-continuous inward distances `inwardDist` (Lemma 5.3) and concentrated-measure fairness (Lemma 5.4) with a normalized Lebesgue ball witness. Additionally, `Solution.lean` provides `convex_partition_counterexample_ge_24` ($d \ge 24$, taking $5d - 4$ central blocking markers), `convex_partition_counterexample_ge_36` ($d \ge 36$, taking $5d$ central blocking markers without `[AKS]`), `convex_partition_counterexample_ge_18` ($d \ge 18$, conditional on $\Delta^{89} \to \mathbb{R}^{16}$ and $5d$ markers), and `twofold_seven_color_join` ($\Delta^{41} \to \mathbb{R}^7 \implies \Delta^{83} \to \mathbb{R}^{15}$). Note that proving the sharp bound $d \ge 24$ unconditionally in [`paper/manuscript.tex`](paper/manuscript.tex) uses Theorem C ($\Delta^{119} \to \mathbb{R}^{22}$ via `[AKS]`) and the sharper rank-$4$/rank-$5$ semialgebraic dimension bound $5d - 1$ of Theorem 4.1 (`max {5d - 1, 4d + 23}`).
 
 ---
 
